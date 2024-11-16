@@ -1,0 +1,144 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Log in!{% endblock %}
+
+{% block body %}
+    <div class="container d-flex justify-content-center align-items-center" style="height: 100vh;">
+        <div class="card shadow-lg custom-card">
+            <div class="card-body" style="text-align: center;">
+                <h1 class="h3 mb-4 text-center custom-title">Please sign in</h1>
+
+                {% if error %}
+                    <div class="alert alert-danger text-center custom-alert">
+                        {{ error.messageKey|trans(error.messageData, 'security') }}
+                    </div>
+                {% endif %}
+
+                {% if app.user %}
+                    <div class="alert alert-info text-center mb-4">
+                        You are logged in as {{ app.user.userIdentifier }},
+                        <a href="{{ path('app_logout') }}" class="alert-link">Logout</a>
+                    </div>
+                {% endif %}
+
+                <form method="post" class="custom-form">
+                    <div class="mb-3">
+                        <label for="username" class="form-label custom-label">Email</label>
+                        <input type="email" value="{{ last_username }}" name="_username" id="username" class="form-control custom-input" autocomplete="email" required autofocus>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="password" class="form-label custom-label">Password</label>
+                        <input type="password" name="_password" id="password" class="form-control custom-input" autocomplete="current-password" required>
+                    </div>
+
+                    <input type="hidden" name="_csrf_token" value="{{ csrf_token('authenticate') }}">
+
+                    {#
+                    <div class="mb-3">
+                        <div class="form-check">
+                            <input type="checkbox" name="_remember_me" id="_remember_me" class="form-check-input">
+                            <label for="_remember_me" class="form-check-label">Remember me</label>
+                        </div>
+                    </div>
+                    #}
+
+                    <button class="btn btn-lg btn-primary w-100 custom-btn" type="submit">Sign in</button>
+                </form>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block stylesheets %}
+    <style>
+        /* Body styling */
+        body {
+            font-family: 'Roboto', sans-serif;
+            background: linear-gradient(135deg, #6e7bff, #ab8aff);
+            margin: 0;
+            padding: 0;
+            color: #fff;
+        }
+
+        /* Custom Card */
+        .custom-card {
+            background: #ffffff;
+            border-radius: 10px;
+            padding: 30px;
+            box-shadow: 0 15px 25px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .custom-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+        }
+
+        /* Title */
+        .custom-title {
+            color: #333;
+            font-weight: 600;
+            margin-bottom: 20px;
+        }
+
+        /* Alert Styles */
+        .custom-alert {
+            background-color: #f8d7da;
+            color: #721c24;
+            border-radius: 8px;
+            padding: 10px;
+            font-size: 16px;
+        }
+
+        /* Form and input styling */
+        .custom-form {
+            padding: 0;
+        }
+
+        .custom-label {
+            color: #333;
+            font-weight: 500;
+        }
+
+        .custom-input {
+            border-radius: 8px;
+            border: 1px solid #ddd;
+            padding: 12px;
+            margin-bottom: 20px;
+            font-size: 16px;
+            transition: border-color 0.3s ease;
+        }
+
+        .custom-input:focus {
+            border-color: #6e7bff;
+            box-shadow: 0 0 5px rgba(110, 123, 255, 0.7);
+        }
+
+        /* Button */
+        .custom-btn {
+            background: #6e7bff;
+            color: white;
+            border-radius: 8px;
+            font-weight: 600;
+            padding: 12px;
+            transition: background-color 0.3s ease, transform 0.3s ease;
+        }
+
+        .custom-btn:hover {
+            background: #5a66d6;
+            cursor: pointer;
+            transform: translateY(-5px);
+        }
+
+        .custom-btn:focus {
+            outline: none;
+            box-shadow: 0 0 5px rgba(110, 123, 255, 0.7);
+        }
+
+        /* Container */
+        .container {
+            margin-top: 10vh;
+        }
+    </style>
+{% endblock %}

@@ -13,6 +13,7 @@
             background: url('{{ asset('uploads/dialogs/' ~ dialog.image) }}') no-repeat center center fixed;
             background-size: cover;
             color: #fff;
+            overflow: hidden;
         }
         .container {
             display: flex;
@@ -22,10 +23,24 @@
             padding: 20px;
         }
 
-        /* Character Panels */
+        /* Character Panels with Blur Background */
         .character-panel {
             width: 25%;
             text-align: center;
+            position: relative;
+        }
+        .character-panel::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 90%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            filter: blur(10px);
+            border-radius: 15px;
+            z-index: -1;
         }
         .character-panel img {
             border-radius: 50%;
@@ -39,23 +54,27 @@
             font-size: 20px;
             margin: 10px 0;
         }
+        .character-panel .reactions {
+            font-size: 16px;
+            margin-top: 10px;
+        }
 
-        /* Dialog Content */
+        /* Dialog Box */
         .dialog-box {
-            width: 50%;
-            background: rgba(0, 0, 0, 0.7);
-            padding: 20px;
-            border-radius: 15px;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
+            width: 60%; /* Bigger width */
+            background: rgba(0, 0, 0, 0.8);
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.6);
             text-align: center;
         }
         .dialog-box h1 {
-            font-size: 24px;
+            font-size: 28px; /* Larger font size */
             margin-bottom: 20px;
         }
         .dialog-box p {
-            font-size: 18px;
-            line-height: 1.6;
+            font-size: 20px; /* Larger font size */
+            line-height: 1.8;
         }
 
         /* Answer Buttons */
@@ -66,11 +85,11 @@
             background: #ffda79;
             color: #333;
             border: none;
-            padding: 10px 20px;
+            padding: 12px 25px;
             margin: 5px;
             border-radius: 5px;
             cursor: pointer;
-            font-size: 16px;
+            font-size: 18px;
             transition: background 0.3s;
         }
         .answers button:hover {
@@ -86,29 +105,111 @@
         <h2>{{ main_character.name }}</h2>
         <p><strong>Age:</strong> {{ main_character.age }}</p>
         <p><strong>Role:</strong> {{ main_character.roleInFamily.name }}</p>
+        <div class="main-reactions">
+            <p><strong>Emoji:</strong> {{ dialog.emoji }}</p>
+            <p><strong>Reactions:</strong> {{ dialog.reactions }}</p>
+        </div>
     </div>
 
     <!-- Dialog Content -->
-    <div class="dialog-box">
-        <h1>{{ dialog.name }}</h1>
-        <p>{{ dialog.content }}</p>
-        <div class="answers">
-            {% for answer in dialog.answers %}
-                <button onclick="window.location.href='/dialog/{{ answer.id }}'">
+    <div id="conversation">
+        <div class="dialog-box">
+            <h1>{{ dialog.name }}</h1>
+            <p>{{ dialog.content }}</p>
+            <div class="answers">
+                {% for key, answer in dialog.answers %}
+                    <button onclick="fetchDialog({{ key+1 }}, {{ answer.id }}, {{ dialog.id }})">
                     {{ answer.content }}
-                </button>
-            {% endfor %}
+                    </button>
+                {% endfor %}
+            </div>
         </div>
     </div>
 
     <!-- Selected Family Member -->
-    <div class="character-panel">
+    <div id="member-container" class="character-panel">
         {% set member = dialog.members|first %}
         <img src="{{ asset('uploads/images/' ~ member.image) }}" alt="{{ member.name }}">
         <h2>{{ member.name }}</h2>
         <p><strong>Age:</strong> {{ member.age }}</p>
         <p><strong>Role:</strong> {{ member.roleInFamily.name }}</p>
+        <div class="reactions">
+            <p><strong>Emoji:</strong></p>
+            <p><strong>Reactions:</strong></p>
+        </div>
     </div>
 </div>
+
+<script>
+    const conversationContainer = document.getElementById('conversation');
+    const memberContainer = document.getElementById('member-container');
+    const mainCharacterContainer = document.querySelector('.character-panel'); // Assuming the first character panel is the main character.
+
+    function fetchDialog(answerPosition, answerId, dialogId) {
+    fetch(`/api/dialog/${answerId}-${answerPosition}/${dialogId}`)
+      .then(response => response.json())
+      .then(data => {
+        if (data.error) {
+          alert(data.error);
+          return;
+        }
+
+        // Update background image if provided by the backend
+        if (data.backgroundImage) {
+          document.body.style.backgroundImage = `url('${data.backgroundImage}')`;
+        }
+
+        // Update main character image if provided
+        const mainCharacterImage = mainCharacterContainer.querySelector('img');
+        if (data.mainCharacterImage && mainCharacterImage) {
+          mainCharacterImage.src = data.mainCharacterImage;
+        }
+
+        // Update member image if provided
+        const memberImage = memberContainer.querySelector('img');
+        if (data.memberImage && memberImage) {
+          memberImage.src = data.memberImage;
+        }
+
+        // Update reactions and emoji for main character
+        const mainReactionsElement = mainCharacterContainer.querySelector('.reactions');
+        if (mainReactionsElement) {
+          mainReactionsElement.innerHTML = `
+            <p><strong>Emoji:</strong> ${data.mainEmoji || 'None'}</p>
+            <p><strong>Reactions:</strong> ${data.mainReactions || 'None'}</p>
+          `;
+        }
+
+        // Update reactions and emoji for selected member
+        const reactionsElement = memberContainer.querySelector('.reactions');
+        if (reactionsElement) {
+          reactionsElement.innerHTML = `
+            <p><strong>Emoji:</strong> ${data.memberEmoji || 'None'}</p>
+            <p><strong>Reactions:</strong> ${data.memberReactions || 'None'}</p>
+          `;
+        }
+
+        // Create a new dialog box and append to the conversation
+        const newDialog = document.createElement('div');
+        newDialog.classList.add('dialog-box');
+        newDialog.innerHTML = `
+          <h1>${data.name}</h1>
+          <p>${data.content}</p>
+          <div class="answers">
+            ${data.answers.map(answer => `
+              <button onclick="fetchDialog(${answer.id}, ${data.id})">${answer.content}</button>
+            `).join('')}
+          </div>
+        `;
+        conversationContainer.appendChild(newDialog);
+
+        // Scroll to the new dialog for better presentation
+        newDialog.scrollIntoView({ behavior: 'smooth' });
+      })
+      .catch(error => {
+        console.error('Error fetching dialog:', error);
+      });
+  }
+</script>
 </body>
 </html>

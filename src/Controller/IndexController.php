@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Controller;
 
 use App\Entity\Answer;
+use App\Repository\AnswerRepository;
 use App\Repository\DialogRepository;
 use App\Repository\MainCharacterRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -17,7 +18,8 @@ final class IndexController extends AbstractController
 {
     public function __construct(
         private readonly MainCharacterRepository $mainCharacterRepository,
-        private readonly DialogRepository $dialogRepository
+        private readonly DialogRepository $dialogRepository,
+        private readonly AnswerRepository $answerRepository
     ) {
     }
 
@@ -41,14 +43,28 @@ final class IndexController extends AbstractController
         ]);
     }
 
-    #[Route('/api/dialog/{answerId}/{dialogId}', name: 'api_get_dialog', methods: ['GET'])]
-    public function fetchDialogByAnswer(int $answerId, int $dialogId): JsonResponse
+    #[Route('/api/dialog/{answer}/{dialogId}', name: 'api_get_dialog', methods: ['GET'])]
+    public function fetchDialogByAnswer(string $answer, int $dialogId): JsonResponse
     {
-        $dialog = $this->dialogRepository->findOneBy(['parentDialog' => $dialogId, 'selectedAnswer' => $answerId]);
+        [$position, $answerId] = explode('-', $answer);
+        $dialog = $this->dialogRepository->findOneBy(['parentDialog' => $dialogId, 'selectedAnswer' => $position]);
+        $answer = $this->answerRepository->find($answerId);
 
         if (!$dialog) {
             return new JsonResponse(['error' => 'Dialog not found'], 404);
         }
+
+        $mainCharacterData =  [
+            'image' => null,
+            'emoji' => $dialog->getEmoji(),
+            'reactions' => $dialog->getReactions(),
+        ] ;
+
+        $memberData = $answer ? [
+            'image' => null,
+            'emoji' => $answer->getEmoji(),
+            'reactions' => $answer->getReactions(),
+        ] : null;
 
         return new JsonResponse([
             'id' => $dialog->getId(),
@@ -58,12 +74,11 @@ final class IndexController extends AbstractController
                 return [
                     'id' => $answer->getId(),
                     'content' => $answer->getContent(),
-                    'emoji' => $answer->getEmoji(),
-                    'reactions' => $answer->getReactions(),
                 ];
             }, $dialog->getAnswers()->toArray()),
-            'emoji' => $dialog->getEmoji(),
-            'reactions' => $dialog->getReactions(),
+            'backgroundImage' => $dialog->getImage(),
+            'mainCharacter' => $mainCharacterData, // Main character data
+            'member' => $memberData, // Selected member data
         ]);
     }
 

@@ -34,14 +34,14 @@ final class DialogCrudController extends AbstractCrudController
             TextareaField::new('content', 'Dialog Content'),
             ChoiceField::new('emoji', 'Dialog Emoji')
                 ->setChoices([
-                    '😀 Smile' => '😀',
-                    '😢 Cry' => '😢',
-                    '😡 Angry' => '😡',
-                    '😂 Laugh' => '😂',
-                    '🤔 Thinking' => '🤔',
-                    '😴 Sleepy' => '😴',
-                    '👍 Thumbs Up' => '👍',
-                    '👎 Thumbs Down' => '👎',
+                    '😀' => '😀',
+                    '😢' => '😢',
+                    '😡' => '😡',
+                    '😂' => '😂',
+                    '🤔' => '🤔',
+                    '😴' => '😴',
+                    '👍' => '👍',
+                    '👎' => '👎',
                 ])
                 ->allowMultipleChoices(false),
             ImageField::new('image', 'Background Image')

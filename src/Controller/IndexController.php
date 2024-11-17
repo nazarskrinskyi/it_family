@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Controller;
 
+use App\Entity\Answer;
 use App\Repository\DialogRepository;
 use App\Repository\MainCharacterRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -23,12 +24,45 @@ final class IndexController extends AbstractController
     #[Route('/', name: 'app_index', methods: ['GET'])]
     public function __invoke(Request $request): Response
     {
-        $mainCharacter = $this->mainCharacterRepository->findOneBy([], ['id' => 'DESC']);
-        $dialogs = $this->dialogRepository->findOneBy(['parentDialog' => null], ['id' => 'DESC']);
-
         return $this->render('index.html.twig', [
-            'mainCharacter' => $mainCharacter,
-            'dialogs' => $dialogs
+            'main_character' => $this->mainCharacterRepository->findOneBy([], ['id' => 'DESC']),
+        ]);
+    }
+
+    #[Route('/dialog/{memberId}', name: 'app_dialog_index', methods: ['GET'])]
+    public function getDialog(int $memberId): Response
+    {
+        $mainCharacter = $this->mainCharacterRepository->findOneBy([], ['id' => 'DESC']);
+        $dialog = $this->dialogRepository->findDialogByMemberAndParent($memberId);
+
+        return $this->render('dialog.html.twig', [
+            'main_character' => $mainCharacter,
+            'dialog' => $dialog
+        ]);
+    }
+
+    #[Route('/api/dialog/{answerId}/{dialogId}', name: 'api_get_dialog', methods: ['GET'])]
+    public function fetchDialogByAnswer(int $answerId, int $dialogId): JsonResponse
+    {
+        $dialog = $this->dialogRepository->findOneBy(['parentDialog' => $dialogId, 'selectedAnswer' => $answerId]);
+
+        if (!$dialog) {
+            return new JsonResponse(['error' => 'Dialog not found'], 404);
+        }
+
+        return new JsonResponse([
+            'name' => $dialog->getName(),
+            'content' => $dialog->getContent(),
+            'answers' => array_map(function (Answer $answer) {
+                return [
+                    'id' => $answer->getId(),
+                    'content' => $answer->getContent(),
+                    'emoji' => $answer->getEmoji(),
+                    'reactions' => $answer->getReactions(),
+                ];
+            }, $dialog->getAnswers()->toArray()),
+            'emoji' => $dialog->getEmoji(),
+            'reactions' => $dialog->getReactions(),
         ]);
     }
 

@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dialog</title>
+    <style>
+        /* General Styling */
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Arial', sans-serif;
+            background: url('{{ asset('uploads/dialogs/' ~ dialog.image) }}') no-repeat center center fixed;
+            background-size: cover;
+            color: #fff;
+        }
+        .container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            height: 100vh;
+            padding: 20px;
+        }
+
+        /* Character Panels */
+        .character-panel {
+            width: 25%;
+            text-align: center;
+        }
+        .character-panel img {
+            border-radius: 50%;
+            width: 150px;
+            height: 150px;
+            border: 4px solid #fff;
+            object-fit: cover;
+            margin-bottom: 10px;
+        }
+        .character-panel h2 {
+            font-size: 20px;
+            margin: 10px 0;
+        }
+
+        /* Dialog Content */
+        .dialog-box {
+            width: 50%;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
+            text-align: center;
+        }
+        .dialog-box h1 {
+            font-size: 24px;
+            margin-bottom: 20px;
+        }
+        .dialog-box p {
+            font-size: 18px;
+            line-height: 1.6;
+        }
+
+        /* Answer Buttons */
+        .answers {
+            margin-top: 20px;
+        }
+        .answers button {
+            background: #ffda79;
+            color: #333;
+            border: none;
+            padding: 10px 20px;
+            margin: 5px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background 0.3s;
+        }
+        .answers button:hover {
+            background: #ffc107;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <!-- Main Character -->
+    <div class="character-panel">
+        <img src="{{ asset('uploads/images/' ~ main_character.image) }}" alt="{{ main_character.name }}">
+        <h2>{{ main_character.name }}</h2>
+        <p><strong>Age:</strong> {{ main_character.age }}</p>
+        <p><strong>Role:</strong> {{ main_character.roleInFamily.name }}</p>
+    </div>
+
+    <!-- Dialog Content -->
+    <div class="dialog-box">
+        <h1>{{ dialog.name }}</h1>
+        <p>{{ dialog.content }}</p>
+        <div class="answers">
+            {% for answer in dialog.answers %}
+                <button onclick="window.location.href='/dialog/{{ answer.id }}'">
+                    {{ answer.content }}
+                </button>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Selected Family Member -->
+    <div class="character-panel">
+        {% set member = dialog.members|first %}
+        <img src="{{ asset('uploads/images/' ~ member.image) }}" alt="{{ member.name }}">
+        <h2>{{ member.name }}</h2>
+        <p><strong>Age:</strong> {{ member.age }}</p>
+        <p><strong>Role:</strong> {{ member.roleInFamily.name }}</p>
+    </div>
+</div>
+</body>
+</html>

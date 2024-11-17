@@ -32,6 +32,7 @@ final class DialogCrudController extends AbstractCrudController
                 ->setFormTypeOptions(['by_reference' => false])
                 ->setRequired(false),
             TextareaField::new('content', 'Dialog Content'),
+            TextareaField::new('answer', 'Dialog Content')->setRequired(false),
             ChoiceField::new('emoji', 'Dialog Emoji')
                 ->setChoices([
                     '😀' => '😀',
@@ -42,6 +43,20 @@ final class DialogCrudController extends AbstractCrudController
                     '😴' => '😴',
                     '👍' => '👍',
                     '👎' => '👎',
+                ])
+                ->allowMultipleChoices(false),
+            ChoiceField::new('reactions', 'Dialog Emoji')
+                ->setChoices([
+                    'Smile' => 'happy',
+                    'Bored' => 'bored',
+                    'Angry' => 'angry',
+                    'Sick' => 'sick',
+                    'Sad' => 'sad',
+                    'excited' => 'excited',
+                    'exhausted' => 'exhausted',
+                    'Interested' => 'interested',
+                    'Relieved' => 'relieved',
+                    'Shocked' => 'shocked',
                 ])
                 ->allowMultipleChoices(false),
             ImageField::new('image', 'Background Image')

@@ -5,56 +5,90 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Main Character and Family</title>
     <style>
+        /* General Styling */
         body {
-            font-family: Arial, sans-serif;
-            background-color: #f4f4f4;
+            font-family: 'Arial', sans-serif;
             margin: 0;
             padding: 0;
+            background: url('{{ asset('uploads/3334896.jpg') }}') no-repeat center center fixed;
+            background-size: cover;
+            color: #333;
         }
+
         .container {
-            max-width: 800px;
-            margin: 20px auto;
+            max-width: 1200px;
+            margin: 50px auto;
             padding: 20px;
-            background: #fff;
-            border-radius: 8px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 15px;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
         }
-        .character, .family-members {
+
+        /* Main Character Styling */
+        .character {
+            text-align: center;
+            padding: 20px;
+            border-bottom: 2px solid #eee;
+        }
+
+        .character img {
+            width: 200px;
+            height: 200px;
             margin-bottom: 20px;
+            border: 6px solid #ddd;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
         }
-        .character img, .family-member img {
-            border-radius: 8px;
-            max-width: 100px;
+
+        .character h2 {
+            font-size: 32px;
+            color: #444;
         }
+
+        .character p {
+            font-size: 20px;
+            margin: 10px 0;
+        }
+
+        /* Family Members Section */
+        .family-members {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .family-members h2 {
+            font-size: 20px;
+            color: #444;
+            margin-bottom: 15px;
+        }
+
         .family-member {
             display: inline-block;
-            text-align: center;
-            margin: 10px;
+            width: 220px;
+            padding: 15px;
+            margin: 15px;
+            background: #f8f9fa;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s, box-shadow 0.3s;
             cursor: pointer;
         }
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.8);
-            color: #fff;
-            justify-content: center;
-            align-items: center;
+
+        .family-member:hover {
+            transform: scale(1.05);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
         }
-        .modal-content {
-            background: #333;
-            padding: 20px;
-            border-radius: 8px;
-            max-width: 500px;
-            text-align: center;
+
+        .family-member img {
+            width: 150px;
+            height: 150px;
+            margin-bottom: 15px;
+            border: 4px solid #ddd;
         }
-        .modal-close {
-            margin-top: 20px;
-            cursor: pointer;
-            color: #ff5252;
+
+        .family-member p {
+            font-size: 15px;
+            margin: 5px 0;
+            color: #555;
         }
     </style>
 </head>
@@ -63,58 +97,29 @@
     <!-- Main Character Section -->
     <div class="character">
         <h2>Main Character</h2>
-        <img src="{{ main_character.image }}" alt="{{ main_character.name }}">
+        <img src="{{ asset('uploads/images/' ~ main_character.image) }}" alt="{{ main_character.name }}">
         <p><strong>Name:</strong> {{ main_character.name }}</p>
         <p><strong>Age:</strong> {{ main_character.age }}</p>
-        <p><strong>Role in Family:</strong> {{ main_character.roleInFamily }}</p>
-        <p><strong>Role in IT Team:</strong> {{ main_character.roleInItTeam }}</p>
+        <p><strong>Role in Family:</strong> {{ main_character.roleInFamily.name }}</p>
+        <p><strong>Role in IT Team:</strong> {{ main_character.roleInItTeam.name }}</p>
     </div>
 
     <!-- Family Members Section -->
     <div class="family-members">
         <h2>Family Members</h2>
         {% for member in main_character.familyMembers %}
-            <div class="family-member" data-member-id="{{ member.id }}">
-                <img src="{{ member.image }}" alt="{{ member.name }}">
-                <p>{{ member.name }}</p>
-            </div>
+            <a href="/dialog/{{ member.id }}">
+                <div class="family-member" data-member-id="{{ member.id }}">
+                    <img src="{{ asset('uploads/images/' ~ member.image) }}" alt="{{ member.name }}">
+                    <p><strong>Name:</strong> {{ member.name }}</p>
+                    <p><strong>Age:</strong> {{ member.age }}</p>
+                    <p><strong>Role in Family:</strong> {{ member.roleInFamily.name }}</p>
+                    <p><strong>Role in IT Team:</strong> {{ member.roleInItTeam.name }}</p>
+                </div>
+            </a>
         {% endfor %}
     </div>
 </div>
 
-<!-- Modal for Dialog -->
-<div id="dialog-modal" class="modal">
-    <div class="modal-content">
-        <h2>Dialog</h2>
-        <p id="dialog-content"></p>
-        <div class="modal-close">Close</div>
-    </div>
-</div>
-
-<script>
-  document.addEventListener('DOMContentLoaded', function () {
-    const modal = document.getElementById('dialog-modal');
-    const dialogContent = document.getElementById('dialog-content');
-    const modalClose = document.querySelector('.modal-close');
-
-    document.querySelectorAll('.family-member').forEach(member => {
-      member.addEventListener('click', async () => {
-        const memberId = member.getAttribute('data-member-id');
-
-        // Fetch dialog via AJAX (replace '/dialog' with your API endpoint)
-        const response = await fetch(`/dialog?member_id=${memberId}`);
-        const data = await response.json();
-
-        // Populate the modal with dialog content
-        dialogContent.innerText = data.dialogContent || 'No dialog available.';
-        modal.style.display = 'flex';
-      });
-    });
-
-    modalClose.addEventListener('click', () => {
-      modal.style.display = 'none';
-    });
-  });
-</script>
 </body>
 </html>

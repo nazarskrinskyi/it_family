@@ -23,6 +23,9 @@ class Dialog
     #[ORM\Column(type: 'text')]
     private string $content;
 
+    #[ORM\Column(type: 'text')]
+    private ?string $answer = null;
+
     #[ORM\ManyToOne(targetEntity: self::class)]
     #[ORM\JoinColumn(onDelete: "SET NULL")]
     private ?Dialog $parentDialog = null;
@@ -35,6 +38,9 @@ class Dialog
 
     #[ORM\Column(type: 'string', length: 10, nullable: true)]
     private ?string $emoji = null;
+
+    #[ORM\Column(type: 'string', nullable: true)]
+    private ?string $reactions = null;
 
     #[ORM\ManyToMany(targetEntity: FamilyMember::class)]
     #[ORM\JoinTable(name: 'dialog_members')]
@@ -57,6 +63,26 @@ class Dialog
     public function setId(?int $id): void
     {
         $this->id = $id;
+    }
+
+    public function getReactions(): ?string
+    {
+        return $this->reactions;
+    }
+
+    public function setReactions(?string $reactions): void
+    {
+        $this->reactions = $reactions;
+    }
+
+    public function getAnswer(): ?string
+    {
+        return $this->answer;
+    }
+
+    public function setAnswer(?string $answer): void
+    {
+        $this->answer = $answer;
     }
 
     public function getSelectedAnswer(): ?int

@@ -7,6 +7,7 @@ namespace App\Controller;
 use App\Entity\Answer;
 use App\Repository\AnswerRepository;
 use App\Repository\DialogRepository;
+use App\Repository\FamilyMemberRepository;
 use App\Repository\MainCharacterRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -19,6 +20,7 @@ final class IndexController extends AbstractController
     public function __construct(
         private readonly MainCharacterRepository $mainCharacterRepository,
         private readonly DialogRepository $dialogRepository,
+        private readonly FamilyMemberRepository $familyMemberRepository,
         private readonly AnswerRepository $answerRepository
     ) {
     }
@@ -35,10 +37,12 @@ final class IndexController extends AbstractController
     public function getDialog(int $memberId): Response
     {
         $mainCharacter = $this->mainCharacterRepository->findOneBy([], ['id' => 'DESC']);
+        $member = $this->familyMemberRepository->find($memberId);
         $dialog = $this->dialogRepository->findDialogByMemberAndParent($memberId);
 
         return $this->render('dialog.html.twig', [
             'main_character' => $mainCharacter,
+            'member' => $member,
             'dialog' => $dialog
         ]);
     }
@@ -46,7 +50,7 @@ final class IndexController extends AbstractController
     #[Route('/api/dialog/{answer}/{dialogId}', name: 'api_get_dialog', methods: ['GET'])]
     public function fetchDialogByAnswer(string $answer, int $dialogId): JsonResponse
     {
-        [$position, $answerId] = explode('-', $answer);
+        [$answerId, $position] = explode('-', $answer);
         $dialog = $this->dialogRepository->findOneBy(['parentDialog' => $dialogId, 'selectedAnswer' => $position]);
         $answer = $this->answerRepository->find($answerId);
 
@@ -66,14 +70,17 @@ final class IndexController extends AbstractController
             'reactions' => $answer->getReactions(),
         ] : null;
 
+        $i = 0;
+
         return new JsonResponse([
             'id' => $dialog->getId(),
             'name' => $dialog->getName(),
             'content' => $dialog->getContent(),
-            'answers' => array_map(function (Answer $answer) {
+            'answers' => array_map(function (Answer $answer) use (&$i) {
                 return [
                     'id' => $answer->getId(),
                     'content' => $answer->getContent(),
+                    'position' => $i++,
                 ];
             }, $dialog->getAnswers()->toArray()),
             'backgroundImage' => $dialog->getImage(),

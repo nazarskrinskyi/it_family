@@ -23,7 +23,7 @@ class Dialog
     #[ORM\Column(type: 'text')]
     private string $content;
 
-    #[ORM\Column(type: 'text')]
+    #[ORM\Column(type: 'text', nullable: true)]
     private ?string $answer = null;
 
     #[ORM\ManyToOne(targetEntity: self::class)]

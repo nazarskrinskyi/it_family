@@ -61,19 +61,35 @@
 
         /* Dialog Box */
         .dialog-box {
-            width: 60%; /* Bigger width */
             background: rgba(0, 0, 0, 0.8);
-            padding: 30px;
             border-radius: 20px;
             box-shadow: 0 10px 20px rgba(0, 0, 0, 0.6);
             text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;  /* Center horizontally */
+            justify-content: center;  /* Center vertically */
+            padding: 20px;
+            border: 2px solid #ccc;
+            margin: 20px auto;
+            width: 80%;  /* Adjust width if needed */
+            max-width: 500px;  /* Limit max width */
         }
+        /* Scrollable Conversation */
+        #conversation {
+            max-height: 90vh; /* Adjust to fit the viewport */
+            overflow-y: auto; /* Allow vertical scrolling */
+            border-radius: 15px;
+            position: relative;
+            z-index: 5;
+        }
+
         .dialog-box h1 {
-            font-size: 28px; /* Larger font size */
+            font-size: 28px;
             margin-bottom: 20px;
         }
         .dialog-box p {
-            font-size: 20px; /* Larger font size */
+            font-size: 20px;
             line-height: 1.8;
         }
 
@@ -92,6 +108,7 @@
             font-size: 18px;
             transition: background 0.3s;
         }
+
         .answers button:hover {
             background: #ffc107;
         }
@@ -105,7 +122,7 @@
         <h2>{{ main_character.name }}</h2>
         <p><strong>Age:</strong> {{ main_character.age }}</p>
         <p><strong>Role:</strong> {{ main_character.roleInFamily.name }}</p>
-        <div class="main-reactions">
+        <div class="reactions">
             <p><strong>Emoji:</strong> {{ dialog.emoji }}</p>
             <p><strong>Reactions:</strong> {{ dialog.reactions }}</p>
         </div>
@@ -113,13 +130,15 @@
 
     <!-- Dialog Content -->
     <div id="conversation">
-        <div class="dialog-box">
+        <button onclick="clearHistory()">Clear History</button>
+
+        <div class="dialog-box" data-dialog-id="1">
             <h1>{{ dialog.name }}</h1>
             <p>{{ dialog.content }}</p>
             <div class="answers">
                 {% for key, answer in dialog.answers %}
-                    <button onclick="fetchDialog({{ key+1 }}, {{ answer.id }}, {{ dialog.id }})">
-                    {{ answer.content }}
+                    <button onclick="handleAnswer({{ key+1 }}, {{ answer.id }}, {{ dialog.id }}, '{{ answer.content }}', '{{ member.name }}', {{ member.id }})">
+                        {{ answer.content }}
                     </button>
                 {% endfor %}
             </div>
@@ -127,8 +146,8 @@
     </div>
 
     <!-- Selected Family Member -->
+    <div id="member-id" style="display: none">{{ member.id }}</div>
     <div id="member-container" class="character-panel">
-        {% set member = dialog.members|first %}
         <img src="{{ asset('uploads/images/' ~ member.image) }}" alt="{{ member.name }}">
         <h2>{{ member.name }}</h2>
         <p><strong>Age:</strong> {{ member.age }}</p>
@@ -141,12 +160,85 @@
 </div>
 
 <script>
-    const conversationContainer = document.getElementById('conversation');
-    const memberContainer = document.getElementById('member-container');
-    const mainCharacterContainer = document.querySelector('.character-panel'); // Assuming the first character panel is the main character.
+  const conversationContainer = document.getElementById('conversation');
+  const memberContainer = document.getElementById('member-container');
+  const mainCharacterContainer = document.querySelector('.character-panel'); // Assuming the first character panel is the main character.
 
-    function fetchDialog(answerPosition, answerId, dialogId) {
-    fetch(`/api/dialog/${answerId}-${answerPosition}/${dialogId}`)
+  function loadHistory(memberName, memberId) {
+    const history = JSON.parse(localStorage.getItem('dialogHistory')) || [];
+
+    // Check if history exists for the given member name
+    console.log(memberName);
+    if (history.some(dialog => dialog.memberName === memberName)) {
+      history.forEach(dialog => {
+        if (dialog.memberName === memberName) {
+          const dialogBox = createDialogBox(dialog, memberName, memberId);
+          conversationContainer.appendChild(dialogBox);
+        }
+      });
+    } else {
+      console.log("No history for this member.");
+    }
+  }
+
+  function saveDialogToHistory(dialog) {
+    const history = JSON.parse(localStorage.getItem('dialogHistory')) || [];
+    history.push(dialog);
+    console.log(history);
+    localStorage.setItem('dialogHistory', JSON.stringify(history));
+  }
+
+  function saveCharacterData(memberName, emoji, reactions) {
+    const characterData = JSON.parse(localStorage.getItem('characterData')) || {};
+    characterData[memberName] = { emoji, reactions };
+    localStorage.setItem('characterData', JSON.stringify(characterData));
+  }
+
+  // Load character data from localStorage only if the member name exists
+  function loadCharacterData(memberName) {
+    const characterData = JSON.parse(localStorage.getItem('characterData')) || {};
+
+    // Only load data for the selected member
+    if (characterData[memberName]) {
+      return characterData[memberName];
+    } else {
+      console.log(`No character data for ${memberName}`);
+      return { emoji: '', reactions: '' };  // Default data if no history
+    }
+  }
+
+  // Handle answer selection
+  function handleAnswer(position, answerId, dialogId, answerContent, memberName, memberId) {
+    if (memberName && dialogId) {
+      let storedData = JSON.parse(localStorage.getItem('membersData')) || {};  // Get existing data, or initialize an empty object
+      storedData[memberId] = memberName;  // Store the member's name with dialog ID as key
+      localStorage.setItem('membersData', JSON.stringify(storedData));  // Save updated data back to localStorage
+    }
+    const selectedAnswer = {
+      dialogId,
+      answerContent
+    };
+
+    // Save selected answer to localStorage
+    let selectedAnswers = JSON.parse(localStorage.getItem('selectedAnswers')) || [];
+    // Avoid adding the same answer more than once for the same dialog
+    selectedAnswers = selectedAnswers.filter(ans => ans.dialogId !== dialogId);  // Remove previous answers for the dialog
+    selectedAnswers.push(selectedAnswer);  // Add the new selected answer
+    localStorage.setItem('selectedAnswers', JSON.stringify(selectedAnswers));
+
+    // Remove answer buttons and replace with selected answer
+    const dialogBox = document.querySelector(`[data-dialog-id="${dialogId}"]`);
+    const answers = dialogBox.querySelector('.answers');
+    answers.innerHTML = `<p class="selected-answer">${answerContent}</p>`;  // Replace with text
+
+    // Fetch next dialog from the server after answering
+    fetchDialog(position, answerId, dialogId, memberId);
+  }
+
+  // Fetch dialog and update the UI
+  function fetchDialog(position, answerId, dialogId, memberId) {
+    let memberName = JSON.parse(localStorage.getItem('membersData'))[memberId]
+    fetch(`/api/dialog/${answerId}-${position}/${dialogId}`)
       .then(response => response.json())
       .then(data => {
         if (data.error) {
@@ -154,62 +246,121 @@
           return;
         }
 
-        // Update background image if provided by the backend
-        if (data.backgroundImage) {
-          document.body.style.backgroundImage = `url('${data.backgroundImage}')`;
+        // Update background image if provided
+        if (data.backgroundImage && localStorage.getItem('backgroundImage')) {
+          localStorage.setItem('backgroundImage', data.backgroundImage);
+          document.body.style.backgroundImage = `url('/uploads/dialogs/${localStorage.getItem('backgroundImage')}')`;
         }
 
-        // Update main character image if provided
+        // Update main character's image, emoji, and reactions
         const mainCharacterImage = mainCharacterContainer.querySelector('img');
-        if (data.mainCharacterImage && mainCharacterImage) {
-          mainCharacterImage.src = data.mainCharacterImage;
-        }
+        if (data.mainCharacter.image) mainCharacterImage.src = data.mainCharacter.image;
 
-        // Update member image if provided
+        const { emoji: mainEmoji, reactions: mainReactions } = data.mainCharacter;
+        saveCharacterData('mainCharacter', mainEmoji, mainReactions);
+        updateCharacterInfo(mainCharacterContainer, mainEmoji, mainReactions);
+
+        // Update member's image, emoji, and reactions
         const memberImage = memberContainer.querySelector('img');
-        if (data.memberImage && memberImage) {
-          memberImage.src = data.memberImage;
-        }
+        if (data.member.image) memberImage.src = data.member.image;
 
-        // Update reactions and emoji for main character
-        const mainReactionsElement = mainCharacterContainer.querySelector('.reactions');
-        if (mainReactionsElement) {
-          mainReactionsElement.innerHTML = `
-            <p><strong>Emoji:</strong> ${data.mainEmoji || 'None'}</p>
-            <p><strong>Reactions:</strong> ${data.mainReactions || 'None'}</p>
-          `;
-        }
+        const { emoji: memberEmoji, reactions: memberReactions } = data.member;
+        saveCharacterData(memberName, memberEmoji, memberReactions);
+        updateCharacterInfo(memberContainer, memberEmoji, memberReactions);
 
-        // Update reactions and emoji for selected member
-        const reactionsElement = memberContainer.querySelector('.reactions');
-        if (reactionsElement) {
-          reactionsElement.innerHTML = `
-            <p><strong>Emoji:</strong> ${data.memberEmoji || 'None'}</p>
-            <p><strong>Reactions:</strong> ${data.memberReactions || 'None'}</p>
-          `;
-        }
+        let i = 1;
+        const newDialog = {
+          id: data.id,
+          name: data.name,
+          memberName: memberName,
+          memberId: memberId,
+          content: data.content,
+          answers: data.answers.map(answer => {
+            return {
+              content: answer.content,
+              id: answer.id,
+              position: i++
+            };
+          })
+        };
 
-        // Create a new dialog box and append to the conversation
-        const newDialog = document.createElement('div');
-        newDialog.classList.add('dialog-box');
-        newDialog.innerHTML = `
-          <h1>${data.name}</h1>
-          <p>${data.content}</p>
-          <div class="answers">
-            ${data.answers.map(answer => `
-              <button onclick="fetchDialog(${answer.id}, ${data.id})">${answer.content}</button>
-            `).join('')}
-          </div>
-        `;
-        conversationContainer.appendChild(newDialog);
+        const dialogBox = createDialogBox(newDialog, memberName, memberId);
+        conversationContainer.appendChild(dialogBox);
+        saveDialogToHistory(newDialog);
 
-        // Scroll to the new dialog for better presentation
-        newDialog.scrollIntoView({ behavior: 'smooth' });
+        dialogBox.scrollIntoView({ behavior: 'smooth' });
       })
       .catch(error => {
         console.error('Error fetching dialog:', error);
       });
   }
+  // Update character's emoji and reactions in the UI
+  function updateCharacterInfo(container, emoji, reactions) {
+    const reactionsElement = container.querySelector('.reactions');
+    reactionsElement.innerHTML = `
+      <p><strong>Emoji:</strong> ${emoji || 'None'}</p>
+      <p><strong>Reactions:</strong> ${reactions || 'None'}</p>
+    `;
+  }
+
+  // Create a dialog box element
+  function createDialogBox(dialog, memberName, memberId) {
+    const dialogBox = document.createElement('div');
+    dialogBox.classList.add('dialog-box');
+    dialogBox.dataset.dialogId = dialog.id;  // Adding dialog id for tracking
+
+    // Check if any answer is selected for this dialog
+    const selectedAnswer = dialog.answers.find(answer => checkSelectedAnswer(dialog.id, answer.content));
+
+    dialogBox.innerHTML = `
+    <h1>${dialog.name}</h1>
+    <p>${dialog.content}</p>
+    <div class="answers">
+      ${selectedAnswer ?  // If any answer is selected, show it as text
+      `<p class="selected-answer">${selectedAnswer.content}</p>` :
+      dialog.answers.map(answer => {
+        return `<button onclick="handleAnswer(${answer.position}, ${answer.id}, ${dialog.id}, '${answer.content}', '${memberName}', ${memberId})">${answer.content}</button>`;
+      }).join('')
+    }
+    </div>
+  `;
+
+    return dialogBox;
+  }
+
+  // Check if the answer was previously selected
+  function checkSelectedAnswer(dialogId, answerContent) {
+    const selectedAnswers = JSON.parse(localStorage.getItem('selectedAnswers')) || [];
+    console.log(dialogId, answerContent, selectedAnswers);
+    return selectedAnswers.some(ans => answerContent.includes(ans.answerContent));
+  }
+
+  // Clear dialog history from localStorage
+  function clearHistory() {
+    localStorage.removeItem('dialogHistory');
+    localStorage.removeItem('selectedAnswers');
+    localStorage.removeItem('characterData');
+    localStorage.removeItem('membersData');
+    localStorage.removeItem('backgroundImage');
+
+    location.reload();
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    const memberName = document.querySelector('#member-container h2').innerText;  // Get the member's name dynamically
+    const memberId = document.querySelector('#member-id').innerText;  // Get the member's name dynamically
+
+    // Load conversation history only for the selected member
+    loadHistory(memberName, memberId);
+
+    // Load character data for the selected member
+    const memberData = loadCharacterData(memberName, memberId);
+    updateCharacterInfo(memberContainer, memberData.emoji, memberData.reactions);
+
+    const mainCharacterData = loadCharacterData('mainCharacter');
+    updateCharacterInfo(mainCharacterContainer, mainCharacterData.emoji, mainCharacterData.reactions);
+  });
 </script>
+
 </body>
 </html>

@@ -51,6 +51,7 @@ final class IndexController extends AbstractController
         }
 
         return new JsonResponse([
+            'id' => $dialog->getId(),
             'name' => $dialog->getName(),
             'content' => $dialog->getContent(),
             'answers' => array_map(function (Answer $answer) {

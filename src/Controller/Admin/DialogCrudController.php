@@ -32,7 +32,6 @@ final class DialogCrudController extends AbstractCrudController
                 ->setFormTypeOptions(['by_reference' => false])
                 ->setRequired(false),
             TextareaField::new('content', 'Dialog Content'),
-            TextareaField::new('answer', 'Answer Content')->setRequired(false),
             ChoiceField::new('emoji', 'Dialog Emoji')
                 ->setChoices([
                     '😀' => '😀',

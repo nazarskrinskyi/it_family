@@ -28,6 +28,10 @@ final class IndexController extends AbstractController
     #[Route('/', name: 'app_index', methods: ['GET'])]
     public function __invoke(Request $request): Response
     {
+        if (!$this->mainCharacterRepository->findOneBy([], ['id' => 'DESC'])) {
+            return $this->redirect('/admin');
+        }
+
         return $this->render('index.html.twig', [
             'main_character' => $this->mainCharacterRepository->findOneBy([], ['id' => 'DESC']),
         ]);

@@ -23,9 +23,6 @@ class Dialog
     #[ORM\Column(type: 'text')]
     private string $content;
 
-    #[ORM\Column(type: 'text', nullable: true)]
-    private ?string $answer = null;
-
     #[ORM\ManyToOne(targetEntity: self::class)]
     #[ORM\JoinColumn(onDelete: "SET NULL")]
     private ?Dialog $parentDialog = null;
@@ -73,16 +70,6 @@ class Dialog
     public function setReactions(?string $reactions): void
     {
         $this->reactions = $reactions;
-    }
-
-    public function getAnswer(): ?string
-    {
-        return $this->answer;
-    }
-
-    public function setAnswer(?string $answer): void
-    {
-        $this->answer = $answer;
     }
 
     public function getSelectedAnswer(): ?int
@@ -213,6 +200,6 @@ class Dialog
 
     public function __toString(): string
     {
-        return $this->getName();
+        return $this->getName() . ' - ' . $this->getId();
     }
 }

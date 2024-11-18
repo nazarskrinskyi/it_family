@@ -9,7 +9,10 @@ use App\Enum\RoleInFamily;
 use App\Enum\RoleInItTeam;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
+use Symfony\Component\Form\Extension\Core\Type\CollectionType;
+use Symfony\Component\Form\Extension\Core\Type\DateType;
 use Symfony\Component\Form\Extension\Core\Type\IntegerType;
+use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\Extension\Core\Type\FileType;
 use Symfony\Component\Form\FormBuilderInterface;
@@ -29,27 +32,57 @@ final class FamilyMemberType extends AbstractType
         $builder
             ->add('name', TextType::class, ['label' => 'Name'])
             ->add('age', IntegerType::class, ['label' => 'Age'])
+            ->add('birthDate', DateType::class, [
+                'widget' => 'single_text',
+                'required' => false,
+                'label' => 'Birth Date',
+            ])
+            ->add('bio', TextareaType::class, [
+                'required' => false,
+                'label' => 'Biography',
+            ])
+            ->add('favoriteColor', TextType::class, [
+                'required' => false,
+                'label' => 'Favorite Color',
+            ])
+            ->add('hobbies', CollectionType::class, [
+                'entry_type' => TextType::class,
+                'allow_add' => true,
+                'allow_delete' => true,
+                'required' => false,
+                'label' => 'Hobbies',
+            ])
+            ->add('personalityType', TextType::class, [
+                'required' => false,
+                'label' => 'Personality Type',
+            ])
             ->add('roleInFamily', ChoiceType::class, [
-                'choices' => RoleInFamily::cases(),
-                'choice_label' => function (?RoleInFamily $role) {
-                    return $role?->name; // Display the enum case name
-                },
-                'choice_value' => function (?RoleInFamily $role) {
-                    return $role?->value; // Map enum to its value
-                },
-                'expanded' => false,  // Use dropdown
-                'multiple' => false,  // Don't allow multiple choices
+                'choices' => array_combine(
+                    array_map(fn(RoleInFamily $role) => $role->name, RoleInFamily::cases()),
+                    RoleInFamily::cases()
+                ),
+                'choice_label' => fn(?RoleInFamily $role) => $role?->name,
+                'choice_value' => fn(?RoleInFamily $role) => $role?->value,
+                'expanded' => false,
+                'multiple' => false,
+                'label' => 'Role in Family',
             ])
             ->add('roleInItTeam', ChoiceType::class, [
-                'choices' => RoleInItTeam::cases(),
-                'choice_label' => function (?RoleInItTeam $role) {
-                    return $role?->name; // Display the enum case name
-                },
-                'choice_value' => function (?RoleInItTeam $role) {
-                    return $role?->value; // Map enum to its value
-                },
-                'expanded' => false,  // Use dropdown
-                'multiple' => false,  // Don't allow multiple choices
+                'choices' => array_combine(
+                    array_map(fn(RoleInItTeam $role) => $role->name, RoleInItTeam::cases()),
+                    RoleInItTeam::cases()
+                ),
+                'choice_label' => fn(?RoleInItTeam $role) => $role?->name,
+                'choice_value' => fn(?RoleInItTeam $role) => $role?->value,
+                'expanded' => false,
+                'multiple' => false,
+                'label' => 'Role in IT Team',
+            ])
+            ->add('image', FileType::class, [
+                'label' => 'Image',
+                'required' => false,
+                'mapped' => false,
+                'help' => 'Upload an image if desired.',
             ]);
 
         $builder->addEventListener(FormEvents::PRE_SET_DATA, function (FormEvent $event) {

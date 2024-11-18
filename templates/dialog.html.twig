@@ -132,13 +132,13 @@
     <div id="conversation">
         <button onclick="clearHistory()">Clear History</button>
 
-        <div class="dialog-box" data-dialog-id="1">
+        <div class="dialog-box" data-dialog-id="{{ dialog.id }}">
             <h1>{{ dialog.name }}</h1>
             <p>{{ dialog.content }}</p>
             <div class="answers">
                 {% for key, answer in dialog.answers %}
-                    <button onclick="handleAnswer({{ key+1 }}, {{ answer.id }}, {{ dialog.id }}, '{{ answer.content }}', '{{ member.name }}', {{ member.id }})">
-                        {{ answer.content }}
+                    <button onclick="handleAnswer({{ key+1 }}, {{ answer.id }}, {{ dialog.id }}, '{{ answer.content | escape }}', '{{ member.name | escape }}', '{{ member.id | escape }}')" class="disable">
+                    {{ answer.content }}
                     </button>
                 {% endfor %}
             </div>
@@ -170,6 +170,11 @@
     // Check if history exists for the given member name
     console.log(memberName);
     if (history.some(dialog => dialog.memberName === memberName)) {
+        let buttons = document.querySelectorAll('.disable')
+        buttons.forEach(button => {
+            button.disabled = true;
+        });
+
       history.forEach(dialog => {
         if (dialog.memberName === memberName) {
           const dialogBox = createDialogBox(dialog, memberName, memberId);
@@ -228,6 +233,7 @@
 
     // Remove answer buttons and replace with selected answer
     const dialogBox = document.querySelector(`[data-dialog-id="${dialogId}"]`);
+      console.log(dialogBox)
     const answers = dialogBox.querySelector('.answers');
     answers.innerHTML = `<p class="selected-answer">${answerContent}</p>`;  // Replace with text
 

@@ -17,12 +17,31 @@ class MainCharacter
 {
     use FamilyTrait;
 
+    #[ORM\Column(type: 'boolean', options: ['default' => true])]
+    private bool $isActive = true;
+
     #[ORM\OneToMany(targetEntity: FamilyMember::class, mappedBy: 'mainCharacter', cascade: ['persist', 'remove'])]
     private Collection $familyMembers;
 
     public function __construct()
     {
         $this->familyMembers = new ArrayCollection();
+    }
+
+    /**
+     * @return bool
+     */
+    public function isActive(): bool
+    {
+        return $this->isActive;
+    }
+
+    /**
+     * @param bool $isActive
+     */
+    public function setIsActive(bool $isActive): void
+    {
+        $this->isActive = $isActive;
     }
 
     public function getFamilyMembers(): Collection

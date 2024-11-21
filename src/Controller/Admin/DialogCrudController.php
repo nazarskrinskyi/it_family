@@ -25,12 +25,12 @@ final class DialogCrudController extends AbstractCrudController
     public function configureFields(string $pageName): iterable
     {
         return [
-            AssociationField::new('parentDialog', 'Parent Dialog')->setRequired(false),
-            IntegerField::new('selectedAnswer', 'Selected Parent Answer')->setRequired(false),
-            TextField::new('name', 'Dialog Name'),
-            AssociationField::new('members', 'Participants')
+            AssociationField::new('members', 'Participants'),
+            TextField::new('name', 'Dialog Name')
                 ->setFormTypeOptions(['by_reference' => false])
                 ->setRequired(false),
+            AssociationField::new('parentDialog', 'Parent Dialog')->setRequired(false),
+            IntegerField::new('selectedAnswer', 'Selected Parent Answer')->setRequired(false),
             TextareaField::new('content', 'Dialog Content'),
             ChoiceField::new('emoji', 'Dialog Emoji')
                 ->setChoices([

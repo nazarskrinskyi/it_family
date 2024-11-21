@@ -6,12 +6,15 @@ namespace App\Enum;
 
 enum RoleInFamily: string
 {
-    case FATHER = 'Father';
-    case MOTHER = 'Mother';
+    case MAIN_CHARACTER = 'Main Character';
+    case HUSBAND = 'Husband';
+    case WIFE = 'Wife';
     case SON = 'Son';
     case DAUGHTER = 'Daughter';
     case BROTHER = 'Brother';
     case SISTER = 'Sister';
+    case MOTHER = 'Mother';
+    case FATHER = 'Father';
     case GRANDFATHER = 'Grandfather';
     case GRANDMOTHER = 'Grandmother';
     case GRANDSON = 'Grandson';

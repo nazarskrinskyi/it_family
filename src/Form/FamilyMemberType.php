@@ -32,29 +32,11 @@ final class FamilyMemberType extends AbstractType
         $builder
             ->add('name', TextType::class, ['label' => 'Name'])
             ->add('age', IntegerType::class, ['label' => 'Age'])
-            ->add('birthDate', DateType::class, [
-                'widget' => 'single_text',
+            ->add('image', FileType::class, [
+                'label' => 'Image',
                 'required' => false,
-                'label' => 'Birth Date',
-            ])
-            ->add('bio', TextareaType::class, [
-                'required' => false,
-                'label' => 'Biography',
-            ])
-            ->add('favoriteColor', TextType::class, [
-                'required' => false,
-                'label' => 'Favorite Color',
-            ])
-            ->add('hobbies', CollectionType::class, [
-                'entry_type' => TextType::class,
-                'allow_add' => true,
-                'allow_delete' => true,
-                'required' => false,
-                'label' => 'Hobbies',
-            ])
-            ->add('personalityType', TextType::class, [
-                'required' => false,
-                'label' => 'Personality Type',
+                'mapped' => false,
+                'help' => 'Upload an image if desired.',
             ])
             ->add('roleInFamily', ChoiceType::class, [
                 'choices' => array_combine(
@@ -78,11 +60,29 @@ final class FamilyMemberType extends AbstractType
                 'multiple' => false,
                 'label' => 'Role in IT Team',
             ])
-            ->add('image', FileType::class, [
-                'label' => 'Image',
+            ->add('birthDate', DateType::class, [
+                'widget' => 'single_text',
                 'required' => false,
-                'mapped' => false,
-                'help' => 'Upload an image if desired.',
+                'label' => 'Birth Date',
+            ])
+            ->add('bio', TextareaType::class, [
+                'required' => false,
+                'label' => 'Biography',
+            ])
+            ->add('favoriteColor', TextType::class, [
+                'required' => false,
+                'label' => 'Favorite Color',
+            ])
+            ->add('hobbies', CollectionType::class, [
+                'entry_type' => TextType::class,
+                'allow_add' => true,
+                'allow_delete' => true,
+                'required' => false,
+                'label' => 'Hobbies',
+            ])
+            ->add('personalityType', TextType::class, [
+                'required' => false,
+                'label' => 'Personality Type',
             ]);
 
         $builder->addEventListener(FormEvents::PRE_SET_DATA, function (FormEvent $event) {

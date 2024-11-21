@@ -28,19 +28,19 @@ final class IndexController extends AbstractController
     #[Route('/', name: 'app_index', methods: ['GET'])]
     public function __invoke(Request $request): Response
     {
-        if (!$this->mainCharacterRepository->findOneBy([], ['id' => 'DESC'])) {
+        if (!$this->mainCharacterRepository->findOneBy(['isActive' => true], ['id' => 'DESC'])) {
             return $this->redirect('/admin');
         }
 
         return $this->render('index.html.twig', [
-            'main_character' => $this->mainCharacterRepository->findOneBy([], ['id' => 'DESC']),
+            'main_character' => $this->mainCharacterRepository->findOneBy(['isActive' => true], ['id' => 'DESC']),
         ]);
     }
 
     #[Route('/dialog/{memberId}', name: 'app_dialog_index', methods: ['GET'])]
     public function getDialog(int $memberId): Response
     {
-        $mainCharacter = $this->mainCharacterRepository->findOneBy([], ['id' => 'DESC']);
+        $mainCharacter = $this->mainCharacterRepository->findOneBy(['isActive' => true], ['id' => 'DESC']);
         $member = $this->familyMemberRepository->find($memberId);
         $dialog = $this->dialogRepository->findDialogByMemberAndParent($memberId);
 

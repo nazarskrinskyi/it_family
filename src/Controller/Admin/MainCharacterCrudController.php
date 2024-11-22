@@ -9,9 +9,11 @@ use App\Enum\RoleInFamily;
 use App\Enum\RoleInItTeam;
 use App\Form\FamilyMemberType;
 use EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractCrudController;
+use EasyCorp\Bundle\EasyAdminBundle\Field\BooleanField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\ChoiceField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\CollectionField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\DateField;
+use EasyCorp\Bundle\EasyAdminBundle\Field\TextareaField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\TextField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\IntegerField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\ImageField;
@@ -28,10 +30,11 @@ final class MainCharacterCrudController extends AbstractCrudController
     public function configureFields(string $pageName): iterable
     {
         return [
+            BooleanField::new('is_active', 'Active'),
             TextField::new('name', 'Name'),
             IntegerField::new('age', 'Age'),
             DateField::new('birthDate', 'Birth Date')->setRequired(false),
-            TextField::new('bio', 'Biography')->setRequired(false),
+            TextAreaField::new('bio', 'Biography')->setRequired(false),
             TextField::new('favoriteColor', 'Favorite Color')->setRequired(false),
             CollectionField::new('hobbies', 'Hobbies')
                 ->setEntryType(TextType::class)

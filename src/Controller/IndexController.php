@@ -58,8 +58,17 @@ final class IndexController extends AbstractController
         $dialog = $this->dialogRepository->findOneBy(['parentDialog' => $dialogId, 'selectedAnswer' => $position]);
         $answer = $this->answerRepository->find($answerId);
 
+        $memberData = $answer ? [
+            'image' => null,
+            'emoji' => $answer->getEmoji(),
+            'reactions' => $answer->getReactions(),
+        ] : null;
+
         if (!$dialog) {
-            return new JsonResponse(['error' => 'Dialog not found'], 404);
+            return new JsonResponse([
+                'last' => true,
+                'member' => $memberData, // Selected member data
+            ]);
         }
 
         $mainCharacterData =  [
@@ -67,12 +76,6 @@ final class IndexController extends AbstractController
             'emoji' => $dialog->getEmoji(),
             'reactions' => $dialog->getReactions(),
         ] ;
-
-        $memberData = $answer ? [
-            'image' => null,
-            'emoji' => $answer->getEmoji(),
-            'reactions' => $answer->getReactions(),
-        ] : null;
 
         $i = 0;
 
@@ -90,17 +93,7 @@ final class IndexController extends AbstractController
             'backgroundImage' => $dialog->getImage(),
             'mainCharacter' => $mainCharacterData, // Main character data
             'member' => $memberData, // Selected member data
+            'last' => false,
         ]);
-    }
-
-    #[Route('/api/new-dialogs', name: 'app_new_dialogs', methods: ['POST, GET'])]
-    public function getNewDialogs(Request $request): JsonResponse
-    {
-        $dialogId = $request->get('dialogId');
-        $answerId = $request->get('answerId');
-
-        $dialog = $this->dialogRepository->findOneBy(['parentDialog' => $dialogId, 'selectedAnswer' => $answerId]);
-
-        return new JsonResponse($dialog);
     }
 }

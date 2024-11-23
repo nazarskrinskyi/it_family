@@ -68,4 +68,10 @@ class MainCharacter
     {
         $this->familyMembers = $familyMembers;
     }
+
+    public function validateAgeDifference(MainCharacter $mainCharacter): bool
+    {
+        $difference = abs($this->getAge() - $mainCharacter->getAge());
+        return $difference >= 16;
+    }
 }

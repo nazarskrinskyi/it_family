@@ -127,6 +127,37 @@
         .answers button:hover {
             background: #ffc107;
         }
+
+        /* Стилі для кнопки */
+        .clear-history-btn {
+            background-color: #f44336; /* Червоний колір фону */
+            color: white; /* Білий колір тексту */
+            border: none; /* Без межі */
+            padding: 10px 20px; /* Відступи */
+            text-align: center; /* Центрування тексту */
+            text-decoration: none; /* Без підкреслення */
+            display: inline-block; /* Інлайн-блок */
+            font-size: 16px; /* Розмір шрифту */
+            border-radius: 5px; /* Закруглені кути */
+            cursor: pointer; /* Курсор у вигляді руки */
+            transition: background-color 0.3s ease; /* Анімація зміни кольору фону */
+        }
+
+        .clear-history-btn:hover {
+            background-color: #e53935; /* Темніший червоний колір при наведенні */
+        }
+
+        /* Стилі для посилання */
+        .dialog-end-message {
+            color: #1976d2; /* Синій колір тексту */
+            text-decoration: none; /* Без підкреслення */
+            font-size: 16px; /* Розмір шрифту */
+            transition: color 0.3s ease; /* Анімація зміни кольору тексту */
+        }
+
+        .dialog-end-message:hover {
+            color: #1565c0; /* Темніший синій колір при наведенні */
+        }
     </style>
 </head>
 <body>
@@ -145,8 +176,8 @@
 
     <!-- Dialog Content -->
     <div id="conversation">
-        <button onclick="clearHistory('{{ member.name | escape }}')">Очистити Історію</button>
-        <а href="{{ path('app_index') }}">Повернутись Назад</а>
+        <button onclick="clearHistory('{{ member.name | escape }}')" class="clear-history-btn" style="margin-left: 20px">Очистити Історію</button>
+        <a href="/" class="dialog-end-message">Повернутися Назад</a>
 
         <div class="dialog-box" data-dialog-id="{{ dialog.id }}">
             <h1>{{ dialog.name }}</h1>

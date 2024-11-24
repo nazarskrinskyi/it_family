@@ -51,11 +51,6 @@ final class MainCharacterCrudController extends AbstractCrudController
                 ->setUploadDir('public/uploads/images')
                 ->setBasePath('uploads/images')
                 ->setRequired(false),
-            CollectionField::new('familyMembers', 'Family Members')
-                ->setFormType(CollectionType::class)
-                ->setEntryType(FamilyMemberType::class)
-                ->allowAdd()
-                ->allowDelete(),
             // New fields
             IntegerField::new('health', 'Health')
                 ->setHelp('Character\'s health level (0-100)'),
@@ -69,6 +64,11 @@ final class MainCharacterCrudController extends AbstractCrudController
                 ->setHelp('Character\'s hunger level (0-100)'),
             IntegerField::new('stress', 'Stress')
                 ->setHelp('Character\'s stress level (0-100)'),
+            CollectionField::new('familyMembers', 'Family Members')
+                ->setFormType(CollectionType::class)
+                ->setEntryType(FamilyMemberType::class)
+                ->allowAdd()
+                ->allowDelete(),
         ];
     }
 }

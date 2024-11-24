@@ -168,6 +168,13 @@
         <h2>{{ main_character.name }}</h2>
         <p><strong>Age:</strong> {{ main_character.age }}</p>
         <p><strong>Role:</strong> {{ main_character.roleInFamily.name }}</p>
+        <!-- New Parameters -->
+        <p><strong>Health:</strong> {{ main_character.health }}</p>
+        <p><strong>Energy:</strong> {{ main_character.energy }}</p>
+        <p><strong>Mood:</strong> {{ main_character.mood }}</p>
+        <p><strong>State:</strong> {{ main_character.state }}</p>
+        <p><strong>Hunger:</strong> {{ main_character.hunger }}</p>
+        <p><strong>Stress:</strong> {{ main_character.stress }}</p>
         <div class="reactions">
             <p><strong>Emoji:</strong> {{ dialog.emoji }}</p>
             <p><strong>Reactions:</strong> {{ dialog.reactions }}</p>
@@ -200,6 +207,13 @@
         <h2>{{ member.name }}</h2>
         <p><strong>Age:</strong> {{ member.age }}</p>
         <p><strong>Role:</strong> {{ member.roleInFamily.name }}</p>
+        <!-- New Parameters -->
+        <p><strong>Health:</strong> {{ member.health }}</p>
+        <p><strong>Energy:</strong> {{ member.energy }}</p>
+        <p><strong>Mood:</strong> {{ member.mood }}</p>
+        <p><strong>State:</strong> {{ member.state }}</p>
+        <p><strong>Hunger:</strong> {{ member.hunger }}</p>
+        <p><strong>Stress:</strong> {{ member.stress }}</p>
         <div class="reactions">
             <p><strong>Emoji:</strong></p>
             <p><strong>Reactions:</strong></p>
@@ -241,23 +255,40 @@
         localStorage.setItem('dialogHistory', JSON.stringify(history));
     }
 
-    function saveCharacterData(memberName, emoji, reactions) {
-        const characterData = JSON.parse(localStorage.getItem('characterData')) || {};
-        characterData[memberName] = {emoji, reactions};
-        localStorage.setItem('characterData', JSON.stringify(characterData));
+    function saveCharacterData(memberName, emoji, reactions, health, energy, mood, state, hunger, stress) {
+      const characterData = JSON.parse(localStorage.getItem('characterData')) || {};
+      characterData[memberName] = {
+        emoji,
+        reactions,
+        health,
+        energy,
+        mood,
+        state,
+        hunger,
+        stress
+      };
+      localStorage.setItem('characterData', JSON.stringify(characterData));
     }
 
     // Load character data from localStorage only if the member name exists
     function loadCharacterData(memberName) {
-        const characterData = JSON.parse(localStorage.getItem('characterData')) || {};
+      const characterData = JSON.parse(localStorage.getItem('characterData')) || {};
 
-        // Only load data for the selected member
-        if (characterData[memberName]) {
-            return characterData[memberName];
-        } else {
-            console.log(`No character data for ${memberName}`);
-            return {emoji: '', reactions: ''};  // Default data if no history
-        }
+      if (characterData[memberName]) {
+        return characterData[memberName];
+      } else {
+        console.log(`No character data for ${memberName}`);
+        return {
+          emoji: '',
+          reactions: '',
+          health: '',
+          energy: '',
+          mood: '',
+          state: '',
+          hunger: '',
+          stress: ''
+        };  // Default data if no history
+      }
     }
 
     // Handle answer selection
@@ -291,80 +322,80 @@
 
     // Fetch dialog and update the UI
     function fetchDialog(position, answerId, dialogId, memberId) {
-        let memberName = JSON.parse(localStorage.getItem('membersData'))[memberId];
-        fetch(`/api/dialog/${answerId}-${position}/${dialogId}`)
-            .then(response => response.json())
-            .then(data => {
-                if (data.error) {
-                    alert(data.error);
-                    return;
-                }
+      let memberName = JSON.parse(localStorage.getItem('membersData'))[memberId];
+      fetch(`/api/dialog/${answerId}-${position}/${dialogId}`)
+        .then(response => response.json())
+        .then(data => {
+          if (data.error) {
+            alert(data.error);
+            return;
+          }
 
-                // Handle dialog ending
-                if (data.last) {
-                    const {emoji, reactions} = data.member;
-                    saveCharacterData(memberName, emoji, reactions);
-                    updateCharacterInfo(memberContainer, emoji, reactions);
+          // Handle dialog ending
+          if (data.last) {
+            const { emoji, reactions, health, energy, mood, state, hunger, stress } = data.member;
+            saveCharacterData(memberName, emoji, reactions, health, energy, mood, state, hunger, stress);
+            updateCharacterInfo(memberContainer, emoji, reactions, health, energy, mood, state, hunger, stress);
 
-                    // Visually mark the dialog as ended
-                    const endMessage = document.createElement('p');
-                    endMessage.className = 'dialog-end-message';
-                    endMessage.innerText = 'This dialog has ended.';
-                    conversationContainer.appendChild(endMessage);
-                    return;
-                }
+            const endMessage = document.createElement('p');
+            endMessage.className = 'dialog-end-message';
+            endMessage.innerText = 'This dialog has ended.';
+            conversationContainer.appendChild(endMessage);
+            return;
+          }
 
-                // Proceed with regular dialog processing
-                if (data.backgroundImage && localStorage.getItem('backgroundImage')) {
-                    localStorage.setItem('backgroundImage', data.backgroundImage);
-                    document.body.style.backgroundImage = `url('/uploads/dialogs/${localStorage.getItem('backgroundImage')}')`;
-                }
+          // Proceed with regular dialog processing
+          const mainCharacterImage = mainCharacterContainer.querySelector('img');
+          if (data.mainCharacter.image) mainCharacterImage.src = data.mainCharacter.image;
 
-                const mainCharacterImage = mainCharacterContainer.querySelector('img');
-                if (data.mainCharacter.image) mainCharacterImage.src = data.mainCharacter.image;
+          const { emoji: mainEmoji, reactions: mainReactions } = data.mainCharacter;
+          saveCharacterData('mainCharacter', mainEmoji, mainReactions, data.mainCharacter.health, data.mainCharacter.energy, data.mainCharacter.mood, data.mainCharacter.state, data.mainCharacter.hunger, data.mainCharacter.stress);
+          updateCharacterInfo(mainCharacterContainer, mainEmoji, mainReactions, data.mainCharacter.health, data.mainCharacter.energy, data.mainCharacter.mood, data.mainCharacter.state, data.mainCharacter.hunger, data.mainCharacter.stress);
 
-                const {emoji: mainEmoji, reactions: mainReactions} = data.mainCharacter;
-                saveCharacterData('mainCharacter', mainEmoji, mainReactions);
-                updateCharacterInfo(mainCharacterContainer, mainEmoji, mainReactions);
+          const memberImage = memberContainer.querySelector('img');
+          if (data.member.image) memberImage.src = data.member.image;
 
-                const memberImage = memberContainer.querySelector('img');
-                if (data.member.image) memberImage.src = data.member.image;
+          const { emoji: memberEmoji, reactions: memberReactions } = data.member;
+          saveCharacterData(memberName, memberEmoji, memberReactions, data.member.health, data.member.energy, data.member.mood, data.member.state, data.member.hunger, data.member.stress);
+          updateCharacterInfo(memberContainer, memberEmoji, memberReactions, data.member.health, data.member.energy, data.member.mood, data.member.state, data.member.hunger, data.member.stress);
 
-                const {emoji: memberEmoji, reactions: memberReactions} = data.member;
-                saveCharacterData(memberName, memberEmoji, memberReactions);
-                updateCharacterInfo(memberContainer, memberEmoji, memberReactions);
+          let i = 1;
+          const newDialog = {
+            id: data.id,
+            name: data.name,
+            memberName: memberName,
+            memberId: memberId,
+            content: data.content,
+            answers: data.answers.map(answer => ({
+              content: answer.content,
+              id: answer.id,
+              position: i++
+            }))
+          };
 
-                let i = 1;
-                const newDialog = {
-                    id: data.id,
-                    name: data.name,
-                    memberName: memberName,
-                    memberId: memberId,
-                    content: data.content,
-                    answers: data.answers.map(answer => ({
-                        content: answer.content,
-                        id: answer.id,
-                        position: i++
-                    }))
-                };
+          const dialogBox = createDialogBox(newDialog, memberName, memberId);
+          conversationContainer.appendChild(dialogBox);
+          saveDialogToHistory(newDialog);
 
-                const dialogBox = createDialogBox(newDialog, memberName, memberId);
-                conversationContainer.appendChild(dialogBox);
-                saveDialogToHistory(newDialog);
-
-                dialogBox.scrollIntoView({behavior: 'smooth'});
-            })
-            .catch(error => {
-                console.error('Error fetching dialog:', error);
-            });
+          dialogBox.scrollIntoView({ behavior: 'smooth' });
+        })
+        .catch(error => {
+          console.error('Error fetching dialog:', error);
+        });
     }
 
     // Update character's emoji and reactions in the UI
-    function updateCharacterInfo(container, emoji, reactions) {
-        const reactionsElement = container.querySelector('.reactions');
-        reactionsElement.innerHTML = `
-      <p><strong>Emoji:</strong> ${emoji || 'None'}</p>
-      <p><strong>Reactions:</strong> ${reactions || 'None'}</p>
+    function updateCharacterInfo(container, emoji, reactions, health, energy, mood, state, hunger, stress) {
+      const reactionsElement = container.querySelector('.reactions');
+      reactionsElement.innerHTML = `
+        <p><strong>Emoji:</strong> ${emoji || 'None'}</p>
+        <p><strong>Reactions:</strong> ${reactions || 'None'}</p>
+        <p><strong>Health:</strong> ${health}</p>
+        <p><strong>Energy:</strong> ${energy}</p>
+        <p><strong>Mood:</strong> ${mood}</p>
+        <p><strong>State:</strong> ${state}</p>
+        <p><strong>Hunger:</strong> ${hunger}</p>
+        <p><strong>Stress:</strong> ${stress}</p>
     `;
     }
 

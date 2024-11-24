@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace App\Controller;
 
 use App\Entity\Answer;
+use App\Entity\Dialog;
+use App\Entity\FamilyMember;
 use App\Repository\AnswerRepository;
 use App\Repository\DialogRepository;
 use App\Repository\FamilyMemberRepository;
@@ -55,19 +57,38 @@ final class IndexController extends AbstractController
     public function fetchDialogByAnswer(string $answer, int $dialogId): JsonResponse
     {
         [$answerId, $position] = explode('-', $answer);
+        /** @var Dialog $dialog */
         $dialog = $this->dialogRepository->findOneBy(['parentDialog' => $dialogId, 'selectedAnswer' => $position]);
+        /** @var Answer $answer */
         $answer = $this->answerRepository->find($answerId);
 
-        $memberData = $answer ? [
+        /** @var FamilyMember $member */
+        $member =  $dialog?->getMembers()->first();
+        $mainCharacter = $this->mainCharacterRepository->findOneBy(['isActive' => true], ['id' => 'DESC']);
+
+        $memberData = $answer && $member ? [
             'image' => null,
             'emoji' => $answer->getEmoji(),
             'reactions' => $answer->getReactions(),
+            'mood' => max(0, min(100, $member->getMood() + (int)$answer->getMood())),
+            'hunger' => max(0, min(100, $member->getHunger() + (int)$answer->getHunger())),
+            'health' => max(0, min(100, $member->getHealth() + (int)$answer->getHealth())),
+            'energy' => max(0, min(100, $member->getEnergy() + (int)$answer->getEnergy())),
+            'stress' => max(0, min(100, $member->getStress() + (int)$answer->getStress())),
+            'state' => $member->updateState()->getState(),
         ] : null;
+
 
         if (!$dialog) {
             return new JsonResponse([
                 'last' => true,
                 'member' => $memberData, // Selected member data
+                'mood' => max(0, min(100, $mainCharacter->getMood() + (int)$answer->getMood())),
+                'hunger' => max(0, min(100, $mainCharacter->getHunger() + (int)$answer->getHunger())),
+                'health' => max(0, min(100, $mainCharacter->getHealth() + (int)$answer->getHealth())),
+                'energy' => max(0, min(100, $mainCharacter->getEnergy() + (int)$answer->getEnergy())),
+                'stress' => max(0, min(100, $mainCharacter->getStress() + (int)$answer->getStress())),
+                'state' => $mainCharacter->updateState()->getState(),
             ]);
         }
 

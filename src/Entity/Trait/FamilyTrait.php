@@ -36,22 +36,22 @@ trait FamilyTrait
     #[ORM\Column(type: 'string', nullable: true)]
     private ?string $image = null;
 
-    #[ORM\Column(type: 'integer', options: ['default' => 100])]
+    #[ORM\Column(type: 'integer', nullable: true, options: ['default' => 100])]
     private int $health = 100;
 
-    #[ORM\Column(type: 'integer', options: ['default' => 100])]
+    #[ORM\Column(type: 'integer', nullable: true, options: ['default' => 100])]
     private int $energy = 100;
 
-    #[ORM\Column(type: 'integer', options: ['default' => 50])]
+    #[ORM\Column(type: 'integer', nullable: true, options: ['default' => 50])]
     private int $mood = 50;
 
-    #[ORM\Column(type: 'string', length: 255, options: ['default' => 'normal'])]
+    #[ORM\Column(type: 'string', length: 255, nullable: true, options: ['default' => 'normal'])]
     private string $state = 'normal';
 
-    #[ORM\Column(type: 'integer', options: ['default' => 50])]
+    #[ORM\Column(type: 'integer', nullable: true, options: ['default' => 50])]
     private int $hunger = 50;
 
-    #[ORM\Column(type: 'integer', options: ['default' => 50])]
+    #[ORM\Column(type: 'integer', nullable: true,options: ['default' => 50])]
     private int $stress = 50;
 
     public function getRoleInFamily(): ?RoleInFamily
@@ -129,19 +129,19 @@ trait FamilyTrait
         $this->image = $image;
     }
 
-    public function getHealth(): int
+    public function getHealth(): ?int
     {
-        return $this->health;
+        return $this->health ?? 100;
     }
 
-    public function setHealth(int $health): void
+    public function setHealth(?int $health): void
     {
         $this->health = max(0, min(100, $health));
     }
 
     public function getEnergy(): int
     {
-        return $this->energy;
+        return $this->energy ?? 100;
     }
 
     public function setEnergy(int $energy): void
@@ -151,7 +151,7 @@ trait FamilyTrait
 
     public function getMood(): int
     {
-        return $this->mood;
+        return $this->mood ?? 50;
     }
 
     public function setMood(int $mood): void
@@ -171,7 +171,7 @@ trait FamilyTrait
 
     public function getHunger(): int
     {
-        return $this->hunger;
+        return $this->hunger ?? 50;
     }
 
     public function setHunger(int $hunger): void
@@ -181,7 +181,7 @@ trait FamilyTrait
 
     public function getStress(): int
     {
-        return $this->stress;
+        return $this->stress ?? 50;
     }
 
     public function setStress(int $stress): void
@@ -241,8 +241,16 @@ trait FamilyTrait
     }
 
     // Derived logic
-    public function updateStateBasedOnHealth(): void
+    public function updateState(): self
     {
+        if ($this->stress > 80) {
+            $this->mood = max(0, $this->mood - 10);
+        }
+
+        if ($this->hunger > 70) {
+            $this->decreaseEnergy(10);
+        }
+
         if ($this->health < 30) {
             $this->state = 'sick';
         } elseif ($this->energy < 20) {
@@ -250,19 +258,7 @@ trait FamilyTrait
         } else {
             $this->state = 'normal';
         }
-    }
 
-    public function updateMoodBasedOnStress(): void
-    {
-        if ($this->stress > 80) {
-            $this->mood = max(0, $this->mood - 10);
-        }
-    }
-
-    public function updateEnergyBasedOnHunger(): void
-    {
-        if ($this->hunger > 70) {
-            $this->decreaseEnergy(10);
-        }
+        return $this;
     }
 }

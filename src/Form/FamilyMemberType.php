@@ -10,7 +10,6 @@ use App\Enum\RoleInItTeam;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\CollectionType;
-use Symfony\Component\Form\Extension\Core\Type\DateType;
 use Symfony\Component\Form\Extension\Core\Type\IntegerType;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
@@ -60,18 +59,9 @@ final class FamilyMemberType extends AbstractType
                 'multiple' => false,
                 'label' => 'Role in IT Team',
             ])
-            ->add('birthDate', DateType::class, [
-                'widget' => 'single_text',
-                'required' => false,
-                'label' => 'Birth Date',
-            ])
             ->add('bio', TextareaType::class, [
                 'required' => false,
                 'label' => 'Biography',
-            ])
-            ->add('favoriteColor', TextType::class, [
-                'required' => false,
-                'label' => 'Favorite Color',
             ])
             ->add('hobbies', CollectionType::class, [
                 'entry_type' => TextType::class,
@@ -80,9 +70,30 @@ final class FamilyMemberType extends AbstractType
                 'required' => false,
                 'label' => 'Hobbies',
             ])
-            ->add('personalityType', TextType::class, [
-                'required' => false,
-                'label' => 'Personality Type',
+            // Adding new fields
+            ->add('health', IntegerType::class, [
+                'label' => 'Health',
+                'help' => 'Character\'s health level (0-100)',
+            ])
+            ->add('energy', IntegerType::class, [
+                'label' => 'Energy',
+                'help' => 'Character\'s energy level (0-100)',
+            ])
+            ->add('mood', IntegerType::class, [
+                'label' => 'Mood',
+                'help' => 'Character\'s mood level (0-100)',
+            ])
+            ->add('state', TextType::class, [
+                'label' => 'State',
+                'help' => 'Character\'s state (e.g., normal, tired, sick)',
+            ])
+            ->add('hunger', IntegerType::class, [
+                'label' => 'Hunger',
+                'help' => 'Character\'s hunger level (0-100)',
+            ])
+            ->add('stress', IntegerType::class, [
+                'label' => 'Stress',
+                'help' => 'Character\'s stress level (0-100)',
             ]);
 
         $builder->addEventListener(FormEvents::PRE_SET_DATA, function (FormEvent $event) {
@@ -90,13 +101,13 @@ final class FamilyMemberType extends AbstractType
 
             $event->getForm()
                 ->add('image', FileType::class, [
-                'label' => 'Image',
-                'required' => false,
-                'mapped' => false,
-                'help' => $entity && $entity->getImage()
-                    ? sprintf('Current file: %s', $entity->getImage())
-                    : 'No image uploaded',
-            ]);
+                    'label' => 'Image',
+                    'required' => false,
+                    'mapped' => false,
+                    'help' => $entity && $entity->getImage()
+                        ? sprintf('Current file: %s', $entity->getImage())
+                        : 'No image uploaded',
+                ]);
         });
 
         $builder->addEventListener(FormEvents::POST_SUBMIT, function (FormEvent $event) {
@@ -107,7 +118,7 @@ final class FamilyMemberType extends AbstractType
             $uploadedFile = $form->get('image')->getData();
 
             if ($uploadedFile) {
-                $newFilename = uniqid().'.'.$uploadedFile->guessExtension();
+                $newFilename = uniqid() . '.' . $uploadedFile->guessExtension();
 
                 $uploadedFile->move($this->uploadDir, $newFilename);
 

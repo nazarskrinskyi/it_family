@@ -6,7 +6,6 @@ namespace App\Entity\Trait;
 
 use App\Enum\RoleInFamily;
 use App\Enum\RoleInItTeam;
-use DateTimeInterface;
 use Doctrine\ORM\Mapping as ORM;
 
 trait FamilyTrait
@@ -22,20 +21,11 @@ trait FamilyTrait
     #[ORM\Column(type: 'integer')]
     private int $age;
 
-    #[ORM\Column(type: 'date', nullable: true)]
-    private ?DateTimeInterface $birthDate = null;
-
     #[ORM\Column(type: 'text', nullable: true)]
     private ?string $bio = null;
 
-    #[ORM\Column(type: 'string', nullable: true)]
-    private ?string $favoriteColor = null;
-
     #[ORM\Column(type: 'json', nullable: true)]
     private ?array $hobbies = [];
-
-    #[ORM\Column(type: 'string', length: 20, nullable: true)]
-    private ?string $personalityType = null;
 
     #[ORM\Column(type: 'string', length: 255, nullable: true, enumType: RoleInFamily::class)]
     private ?RoleInFamily $roleInFamily = null;
@@ -46,15 +36,47 @@ trait FamilyTrait
     #[ORM\Column(type: 'string', nullable: true)]
     private ?string $image = null;
 
+    #[ORM\Column(type: 'integer', options: ['default' => 100])]
+    private int $health = 100;
+
+    #[ORM\Column(type: 'integer', options: ['default' => 100])]
+    private int $energy = 100;
+
+    #[ORM\Column(type: 'integer', options: ['default' => 50])]
+    private int $mood = 50;
+
+    #[ORM\Column(type: 'string', length: 255, options: ['default' => 'normal'])]
+    private string $state = 'normal';
+
+    #[ORM\Column(type: 'integer', options: ['default' => 50])]
+    private int $hunger = 50;
+
+    #[ORM\Column(type: 'integer', options: ['default' => 50])]
+    private int $stress = 50;
+
+    public function getRoleInFamily(): ?RoleInFamily
+    {
+        return $this->roleInFamily;
+    }
+
+    public function setRoleInFamily(?RoleInFamily $roleInFamily): void
+    {
+        $this->roleInFamily = $roleInFamily;
+    }
+
+    public function getRoleInItTeam(): ?RoleInItTeam
+    {
+        return $this->roleInItTeam;
+    }
+
+    public function setRoleInItTeam(?RoleInItTeam $roleInItTeam): void
+    {
+        $this->roleInItTeam = $roleInItTeam;
+    }
 
     public function getId(): ?int
     {
-        return $this->id ?? null;
-    }
-
-    public function setId(int $id): void
-    {
-        $this->id = $id;
+        return $this->id;
     }
 
     public function getName(): string
@@ -77,104 +99,24 @@ trait FamilyTrait
         $this->age = $age;
     }
 
-    public function getRoleInFamily(): ?RoleInFamily
-    {
-        return $this->roleInFamily;
-    }
-
-    /**
-     * @return DateTimeInterface|null
-     */
-    public function getBirthDate(): ?DateTimeInterface
-    {
-        return $this->birthDate;
-    }
-
-    /**
-     * @param DateTimeInterface|null $birthDate
-     */
-    public function setBirthDate(?DateTimeInterface $birthDate): void
-    {
-        $this->birthDate = $birthDate;
-    }
-
-    /**
-     * @return string|null
-     */
     public function getBio(): ?string
     {
         return $this->bio;
     }
 
-    /**
-     * @param string|null $bio
-     */
     public function setBio(?string $bio): void
     {
         $this->bio = $bio;
     }
 
-    /**
-     * @return string|null
-     */
-    public function getFavoriteColor(): ?string
-    {
-        return $this->favoriteColor ?? null;
-    }
-
-    /**
-     * @param string|null $favoriteColor
-     */
-    public function setFavoriteColor(?string $favoriteColor): void
-    {
-        $this->favoriteColor = $favoriteColor;
-    }
-
-    /**
-     * @return array
-     */
     public function getHobbies(): ?array
     {
         return $this->hobbies;
     }
 
-    /**
-     * @return string|null
-     */
-    public function getPersonalityType(): ?string
-    {
-        return $this->personalityType;
-    }
-
-    /**
-     * @param string|null $personalityType
-     */
-    public function setPersonalityType(?string $personalityType): void
-    {
-        $this->personalityType = $personalityType;
-    }
-
-    /**
-     * @param ?array $hobbies
-     */
     public function setHobbies(?array $hobbies): void
     {
         $this->hobbies = $hobbies;
-    }
-
-    public function setRoleInFamily(?RoleInFamily $roleInFamily): void
-    {
-        $this->roleInFamily = $roleInFamily;
-    }
-
-    public function getRoleInItTeam(): ?RoleInItTeam
-    {
-        return $this->roleInItTeam;
-    }
-
-    public function setRoleInItTeam(?RoleInItTeam $roleInItTeam): void
-    {
-        $this->roleInItTeam = $roleInItTeam;
     }
 
     public function getImage(): ?string
@@ -185,5 +127,142 @@ trait FamilyTrait
     public function setImage(?string $image): void
     {
         $this->image = $image;
+    }
+
+    public function getHealth(): int
+    {
+        return $this->health;
+    }
+
+    public function setHealth(int $health): void
+    {
+        $this->health = max(0, min(100, $health));
+    }
+
+    public function getEnergy(): int
+    {
+        return $this->energy;
+    }
+
+    public function setEnergy(int $energy): void
+    {
+        $this->energy = max(0, min(100, $energy));
+    }
+
+    public function getMood(): int
+    {
+        return $this->mood;
+    }
+
+    public function setMood(int $mood): void
+    {
+        $this->mood = max(0, min(100, $mood));
+    }
+
+    public function getState(): string
+    {
+        return $this->state;
+    }
+
+    public function setState(string $state): void
+    {
+        $this->state = $state;
+    }
+
+    public function getHunger(): int
+    {
+        return $this->hunger;
+    }
+
+    public function setHunger(int $hunger): void
+    {
+        $this->hunger = max(0, min(100, $hunger));
+    }
+
+    public function getStress(): int
+    {
+        return $this->stress;
+    }
+
+    public function setStress(int $stress): void
+    {
+        $this->stress = max(0, min(100, $stress));
+    }
+
+    // Utility methods for updating parameters
+    public function increaseHealth(int $amount): void
+    {
+        $this->setHealth($this->health + $amount);
+    }
+
+    public function decreaseHealth(int $amount): void
+    {
+        $this->setHealth($this->health - $amount);
+    }
+
+    public function increaseEnergy(int $amount): void
+    {
+        $this->setEnergy($this->energy + $amount);
+    }
+
+    public function decreaseEnergy(int $amount): void
+    {
+        $this->setEnergy($this->energy - $amount);
+    }
+
+    public function increaseMood(int $amount): void
+    {
+        $this->setMood($this->mood + $amount);
+    }
+
+    public function decreaseMood(int $amount): void
+    {
+        $this->setMood($this->mood - $amount);
+    }
+
+    public function increaseHunger(int $amount): void
+    {
+        $this->setHunger($this->hunger + $amount);
+    }
+
+    public function decreaseHunger(int $amount): void
+    {
+        $this->setHunger($this->hunger - $amount);
+    }
+
+    public function increaseStress(int $amount): void
+    {
+        $this->setStress($this->stress + $amount);
+    }
+
+    public function decreaseStress(int $amount): void
+    {
+        $this->setStress($this->stress - $amount);
+    }
+
+    // Derived logic
+    public function updateStateBasedOnHealth(): void
+    {
+        if ($this->health < 30) {
+            $this->state = 'sick';
+        } elseif ($this->energy < 20) {
+            $this->state = 'exhausted';
+        } else {
+            $this->state = 'normal';
+        }
+    }
+
+    public function updateMoodBasedOnStress(): void
+    {
+        if ($this->stress > 80) {
+            $this->mood = max(0, $this->mood - 10);
+        }
+    }
+
+    public function updateEnergyBasedOnHunger(): void
+    {
+        if ($this->hunger > 70) {
+            $this->decreaseEnergy(10);
+        }
     }
 }

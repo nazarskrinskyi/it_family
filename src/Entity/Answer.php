@@ -4,12 +4,15 @@ declare(strict_types=1);
 
 namespace App\Entity;
 
+use App\Entity\Trait\DialogTrait;
 use App\Repository\AnswerRepository;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: AnswerRepository::class), ORM\Table(name: 'answers')]
 class Answer
 {
+    use DialogTrait;
+
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column(type: 'integer')]

@@ -61,6 +61,18 @@ final class DialogCrudController extends AbstractCrudController
             ImageField::new('image', 'Background Image')
                 ->setUploadDir('public/uploads/dialogs')
                 ->setBasePath('uploads/dialogs'),
+            TextField::new('health', 'Health')
+                ->setHelp('Character\'s health level (0-100)'),
+            TextField::new('energy', 'Energy')
+                ->setHelp('Character\'s energy level (0-100)'),
+            TextField::new('mood', 'Mood')
+                ->setHelp('Character\'s mood level (0-100)'),
+            TextField::new('state', 'State')
+                ->setHelp('Character\'s state (e.g., normal, tired, sick)'),
+            TextField::new('hunger', 'Hunger')
+                ->setHelp('Character\'s hunger level (0-100)'),
+            TextField::new('stress', 'Stress')
+                ->setHelp('Character\'s stress level (0-100)'),
             CollectionField::new('answers', 'Answers')
                 ->setEntryType(AnswerType::class)
                 ->allowAdd()

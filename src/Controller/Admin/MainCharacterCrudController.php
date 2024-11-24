@@ -12,7 +12,6 @@ use EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractCrudController;
 use EasyCorp\Bundle\EasyAdminBundle\Field\BooleanField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\ChoiceField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\CollectionField;
-use EasyCorp\Bundle\EasyAdminBundle\Field\DateField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\TextareaField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\TextField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\IntegerField;
@@ -33,14 +32,11 @@ final class MainCharacterCrudController extends AbstractCrudController
             BooleanField::new('is_active', 'Active'),
             TextField::new('name', 'Name'),
             IntegerField::new('age', 'Age'),
-            DateField::new('birthDate', 'Birth Date')->setRequired(false),
-            TextAreaField::new('bio', 'Biography')->setRequired(false),
-            TextField::new('favoriteColor', 'Favorite Color')->setRequired(false),
+            TextareaField::new('bio', 'Biography')->setRequired(false),
             CollectionField::new('hobbies', 'Hobbies')
                 ->setEntryType(TextType::class)
                 ->allowAdd()
                 ->allowDelete(),
-            TextField::new('personalityType', 'Personality Type')->setRequired(false),
             ChoiceField::new('roleInFamily', 'Role in Family')
                 ->setChoices(array_combine(
                     array_map(fn($role) => $role->name, RoleInFamily::cases()), // Display enum names as labels
@@ -60,6 +56,19 @@ final class MainCharacterCrudController extends AbstractCrudController
                 ->setEntryType(FamilyMemberType::class)
                 ->allowAdd()
                 ->allowDelete(),
+            // New fields
+            IntegerField::new('health', 'Health')
+                ->setHelp('Character\'s health level (0-100)'),
+            IntegerField::new('energy', 'Energy')
+                ->setHelp('Character\'s energy level (0-100)'),
+            IntegerField::new('mood', 'Mood')
+                ->setHelp('Character\'s mood level (0-100)'),
+            TextField::new('state', 'State')
+                ->setHelp('Character\'s state (e.g., normal, tired, sick)'),
+            IntegerField::new('hunger', 'Hunger')
+                ->setHelp('Character\'s hunger level (0-100)'),
+            IntegerField::new('stress', 'Stress')
+                ->setHelp('Character\'s stress level (0-100)'),
         ];
     }
 }

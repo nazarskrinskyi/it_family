@@ -134,9 +134,11 @@ trait FamilyTrait
         return $this->health ?? 100;
     }
 
-    public function setHealth(?int $health): void
+    public function setHealth(?int $health): self
     {
         $this->health = max(0, min(100, $health));
+
+        return $this;
     }
 
     public function getEnergy(): int
@@ -144,9 +146,11 @@ trait FamilyTrait
         return $this->energy ?? 100;
     }
 
-    public function setEnergy(int $energy): void
+    public function setEnergy(int $energy): self
     {
         $this->energy = max(0, min(100, $energy));
+
+        return $this;
     }
 
     public function getMood(): int
@@ -154,9 +158,11 @@ trait FamilyTrait
         return $this->mood ?? 50;
     }
 
-    public function setMood(int $mood): void
+    public function setMood(int $mood): self
     {
         $this->mood = max(0, min(100, $mood));
+
+        return $this;
     }
 
     public function getState(): string
@@ -164,9 +170,11 @@ trait FamilyTrait
         return $this->state;
     }
 
-    public function setState(string $state): void
+    public function setState(string $state): self
     {
         $this->state = $state;
+
+        return $this;
     }
 
     public function getHunger(): int
@@ -174,9 +182,11 @@ trait FamilyTrait
         return $this->hunger ?? 50;
     }
 
-    public function setHunger(int $hunger): void
+    public function setHunger(int $hunger): self
     {
         $this->hunger = max(0, min(100, $hunger));
+
+        return $this;
     }
 
     public function getStress(): int
@@ -184,9 +194,11 @@ trait FamilyTrait
         return $this->stress ?? 50;
     }
 
-    public function setStress(int $stress): void
+    public function setStress(int $stress): self
     {
         $this->stress = max(0, min(100, $stress));
+
+        return $this;
     }
 
     // Utility methods for updating parameters

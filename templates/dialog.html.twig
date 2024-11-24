@@ -168,13 +168,6 @@
         <h2>{{ main_character.name }}</h2>
         <p><strong>Age:</strong> {{ main_character.age }}</p>
         <p><strong>Role:</strong> {{ main_character.roleInFamily.name }}</p>
-        <!-- New Parameters -->
-        <p><strong>Health:</strong> {{ main_character.health }}</p>
-        <p><strong>Energy:</strong> {{ main_character.energy }}</p>
-        <p><strong>Mood:</strong> {{ main_character.mood }}</p>
-        <p><strong>State:</strong> {{ main_character.state }}</p>
-        <p><strong>Hunger:</strong> {{ main_character.hunger }}</p>
-        <p><strong>Stress:</strong> {{ main_character.stress }}</p>
         <div class="reactions">
             <p><strong>Emoji:</strong> {{ dialog.emoji }}</p>
             <p><strong>Reactions:</strong> {{ dialog.reactions }}</p>
@@ -207,13 +200,6 @@
         <h2>{{ member.name }}</h2>
         <p><strong>Age:</strong> {{ member.age }}</p>
         <p><strong>Role:</strong> {{ member.roleInFamily.name }}</p>
-        <!-- New Parameters -->
-        <p><strong>Health:</strong> {{ member.health }}</p>
-        <p><strong>Energy:</strong> {{ member.energy }}</p>
-        <p><strong>Mood:</strong> {{ member.mood }}</p>
-        <p><strong>State:</strong> {{ member.state }}</p>
-        <p><strong>Hunger:</strong> {{ member.hunger }}</p>
-        <p><strong>Stress:</strong> {{ member.stress }}</p>
         <div class="reactions">
             <p><strong>Emoji:</strong></p>
             <p><strong>Reactions:</strong></p>
@@ -276,18 +262,6 @@
 
       if (characterData[memberName]) {
         return characterData[memberName];
-      } else {
-        console.log(`No character data for ${memberName}`);
-        return {
-          emoji: '',
-          reactions: '',
-          health: '',
-          energy: '',
-          mood: '',
-          state: '',
-          hunger: '',
-          stress: ''
-        };  // Default data if no history
       }
     }
 
@@ -348,9 +322,9 @@
           const mainCharacterImage = mainCharacterContainer.querySelector('img');
           if (data.mainCharacter.image) mainCharacterImage.src = data.mainCharacter.image;
 
-          const { emoji: mainEmoji, reactions: mainReactions } = data.mainCharacter;
-          saveCharacterData('mainCharacter', mainEmoji, mainReactions, data.mainCharacter.health, data.mainCharacter.energy, data.mainCharacter.mood, data.mainCharacter.state, data.mainCharacter.hunger, data.mainCharacter.stress);
-          updateCharacterInfo(mainCharacterContainer, mainEmoji, mainReactions, data.mainCharacter.health, data.mainCharacter.energy, data.mainCharacter.mood, data.mainCharacter.state, data.mainCharacter.hunger, data.mainCharacter.stress);
+          const { emoji: mainEmoji, reactions: mainReactions, health: mainHealth, energy: mainEnergy, mood: mainMood, state: mainState, hunger: mainHunger, stress: mainStress } = data.mainCharacter;
+          saveCharacterData('mainCharacter', mainEmoji, mainReactions, mainHealth, mainEnergy, mainMood, mainState, mainHunger, mainStress);
+          updateCharacterInfo(mainCharacterContainer, mainEmoji, mainReactions, mainHealth, mainEnergy, mainMood, mainState, mainHunger, mainStress);
 
           const memberImage = memberContainer.querySelector('img');
           if (data.member.image) memberImage.src = data.member.image;

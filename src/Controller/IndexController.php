@@ -7,6 +7,7 @@ namespace App\Controller;
 use App\Entity\Answer;
 use App\Entity\Dialog;
 use App\Entity\FamilyMember;
+use App\Entity\MainCharacter;
 use App\Repository\AnswerRepository;
 use App\Repository\DialogRepository;
 use App\Repository\FamilyMemberRepository;
@@ -58,24 +59,25 @@ final class IndexController extends AbstractController
     {
         [$answerId, $position] = explode('-', $answer);
         /** @var Dialog $dialog */
-        $dialog = $this->dialogRepository->findOneBy(['parentDialog' => $dialogId, 'selectedAnswer' => $position]);
+        $dialog = $this->dialogRepository->findOneBy(['parentDialog' => $dialogId, 'selectedAnswer' => $answerId]);
         /** @var Answer $answer */
         $answer = $this->answerRepository->find($answerId);
 
         /** @var FamilyMember $member */
-        $member =  $dialog?->getMembers()->first();
+        $member =  $dialog?->getMembers()->last();
+        /** @var MainCharacter $mainCharacter */
         $mainCharacter = $this->mainCharacterRepository->findOneBy(['isActive' => true], ['id' => 'DESC']);
 
         $memberData = $answer && $member ? [
             'image' => null,
             'emoji' => $answer->getEmoji(),
             'reactions' => $answer->getReactions(),
-            'mood' => max(0, min(100, $member->getMood() + (int)$answer->getMood())),
-            'hunger' => max(0, min(100, $member->getHunger() + (int)$answer->getHunger())),
-            'health' => max(0, min(100, $member->getHealth() + (int)$answer->getHealth())),
-            'energy' => max(0, min(100, $member->getEnergy() + (int)$answer->getEnergy())),
-            'stress' => max(0, min(100, $member->getStress() + (int)$answer->getStress())),
-            'state' => $member->updateState()->getState(),
+            'mood' => $member->setMood(max(0, min(100, $member->getMood() + (int)$answer->getMood())))->getMood(),
+            'hunger' => $member->setHunger(max(0, min(100, $member->getHunger() + (int)$answer->getHunger())))->getHunger(),
+            'health' => $member->setHealth(max(0, min(100, $member->getHealth() + (int)$answer->getHealth())))->getHealth(),
+            'energy' => $member->setEnergy(max(0, min(100, $member->getEnergy() + (int)$answer->getEnergy())))->getEnergy(),
+            'stress' => $member->setStress(max(0, min(100, $member->getStress() + (int)$answer->getStress())))->getStress(),
+            'state' => $mainCharacter->updateState()->getState(),
         ] : null;
 
 
@@ -83,12 +85,6 @@ final class IndexController extends AbstractController
             return new JsonResponse([
                 'last' => true,
                 'member' => $memberData, // Selected member data
-                'mood' => max(0, min(100, $mainCharacter->getMood() + (int)$answer->getMood())),
-                'hunger' => max(0, min(100, $mainCharacter->getHunger() + (int)$answer->getHunger())),
-                'health' => max(0, min(100, $mainCharacter->getHealth() + (int)$answer->getHealth())),
-                'energy' => max(0, min(100, $mainCharacter->getEnergy() + (int)$answer->getEnergy())),
-                'stress' => max(0, min(100, $mainCharacter->getStress() + (int)$answer->getStress())),
-                'state' => $mainCharacter->updateState()->getState(),
             ]);
         }
 
@@ -96,6 +92,12 @@ final class IndexController extends AbstractController
             'image' => null,
             'emoji' => $dialog->getEmoji(),
             'reactions' => $dialog->getReactions(),
+            'mood' => $mainCharacter->setMood(max(0, min(100, $mainCharacter->getMood() + (int)$answer->getMood())))->getMood(),
+            'hunger' => $mainCharacter->setHunger(max(0, min(100, $mainCharacter->getHunger() + (int)$answer->getHunger())))->getHunger(),
+            'health' => $mainCharacter->setHealth(max(0, min(100, $mainCharacter->getHealth() + (int)$answer->getHealth())))->getHealth(),
+            'energy' => $mainCharacter->setEnergy(max(0, min(100, $mainCharacter->getEnergy() + (int)$answer->getEnergy())))->getEnergy(),
+            'stress' => $mainCharacter->setStress(max(0, min(100, $mainCharacter->getStress() + (int)$answer->getStress())))->getStress(),
+            'state' => $mainCharacter->updateState()->getState(),
         ] ;
 
         $i = 0;
